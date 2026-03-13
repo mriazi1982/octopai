@@ -8,19 +8,19 @@ EXO is a comprehensive AI Agent skill development platform designed to expand th
 
 At its core, EXO exists to elevate AI Agent cognition through three fundamental pillars:
 
-- **Explore** the vast knowledge available on the internet and in various file formats
-- **Extend** the capabilities of AI Agents through structured, reusable skills
-- **Evolve** skills through intelligent reflection and optimization to match Agent needs
+- **Explore** the vast knowledge available on the internet and in various file formats.
+- **Extend** the capabilities of AI Agents through structured, reusable skills.
+- **Evolve** skills through intelligent reflection and optimization to match Agent needs.
 
 ## ✨ Key Features
 
-### One-Click URL to Skill Conversion
+### ⚡ One-Click URL to Skill Conversion
 Transform any internet resource into structured, AI-ready skills instantly:
 - **Web Pages**: Convert URLs to structured Markdown with one command
 - **Automatic Crawling**: Fetch and organize linked resources
 - **Skill-Ready Output**: Directly usable by AI Agents like Claude Code, Cursor, etc.
 
-### Multi-Format Resource Parser
+### 🧩 Multi-Format Resource Parser
 Parse and transform **any file format** into skill-ready resources:
 - **Documents**: PDF, DOC, DOCX
 - **Spreadsheets**: Excel (XLSX, XLS), CSV
