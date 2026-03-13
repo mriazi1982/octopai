@@ -1,5 +1,8 @@
 # EXO - Explore, Extend, Evolve AI Agent Cognition
 
+[English](./README.md) | [中文文档](./README_CN.md)
+
+
 ## Overview
 
 EXO is a comprehensive AI Agent skill development platform designed to expand the cognitive boundaries of AI Agents. Serving OpenClaw, Claude Code, Codex, Cursor, and other intelligent agent systems, EXO transforms diverse internet resources into structured Skill content that AI Agents can readily understand and utilize. Through self-optimization and evolutionary mechanisms, EXO continuously enhances skill quality to empower AI Agents with broader knowledge and capabilities.
