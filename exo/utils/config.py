@@ -1,10 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-
 # Load environment variables
 load_dotenv()
-
 
 class Config:
     """Project configuration class"""
@@ -16,9 +14,10 @@ class Config:
     # OpenRouter API configuration (required)
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
     
-    # Model configuration
+    # Model configuration - EXO uses latest proprietary models
     EXO_MODEL_PROVIDER = os.getenv('EXO_MODEL_PROVIDER', 'openrouter')
     EXO_MODEL = os.getenv('EXO_MODEL', 'openai/gpt-5.4')
+    EXO_CLAUDE_MODEL = os.getenv('EXO_CLAUDE_MODEL', 'anthropic/claude-4.6')
     
     # Project configuration
     SKILLS_DIR = os.getenv('SKILLS_DIR', './skills')
