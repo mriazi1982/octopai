@@ -40,9 +40,9 @@
 
 ## Overview
 
-EXO is a revolutionary AI Agent Skills Exploration, Extension, and Evolution Intelligence Engine built on a powerful core principle: **Everything Can Be a Skill • Skills Evolve Through Continuous Learning • Elevating AI Agent Cognition**. Serving OpenClaw, Claude Code, Codex, Cursor, and other intelligent agent systems, EXO transforms any resource — web pages, documents, videos, code, datasets, and more — into structured, reusable Skill content. Through intelligent learning and continuous self-evolution, Skills grow and improve over time, significantly enhancing the cognitive capabilities of AI Agents.
+Octopai is a revolutionary AI Agent Skills Exploration, Extension, and Evolution Intelligence Engine built on a powerful core principle: **Everything Can Be a Skill • Skills Evolve Through Continuous Learning • Elevating AI Agent Cognition**. Serving OpenClaw, Claude Code, Codex, Cursor, and other intelligent agent systems, EXO transforms any resource — web pages, documents, videos, code, datasets, and more — into structured, reusable Skill content. Through intelligent learning and continuous self-evolution, Skills grow and improve over time, significantly enhancing the cognitive capabilities of AI Agents.
 
-At the heart of EXO lies the belief that knowledge should not be static. Every Skill created with EXO can continuously learn from interactions, refine itself through reflection, and evolve to become more powerful, more comprehensive, and better suited to the evolving needs of AI Agents.
+At the heart of Octopai lies the belief that knowledge should not be static. Every Skill created with EXO can continuously learn from interactions, refine itself through reflection, and evolve to become more powerful, more comprehensive, and better suited to the evolving needs of AI Agents.
 
 ## Core Philosophy
 
@@ -51,7 +51,7 @@ EXO's revolutionary philosophy is centered around our foundational mission and p
 
 #### The Mission: Explore, Extend, Evolve AI Agent Cognition
 
-At its core, EXO exists to elevate AI Agent cognition through three fundamental pillars:
+At its core, Octopai exists to elevate AI Agent cognition through three fundamental pillars:
 
 - **Explore** the vast knowledge available on the internet and in various file formats
 - **Extend** the capabilities of AI Agents through structured, reusable skills
