@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>An AI Agent Skills Exploration, Extension, and Evolution Intelligence Engine. 🚀</strong>
+  <strong>The Skill Evolution Engine for AI Agents. 🚀</strong>
 </p>
 
 <p align="center">
