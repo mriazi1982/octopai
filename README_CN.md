@@ -32,7 +32,7 @@
 
 ## 概述
 
-EXO是一个革命性的AI Agent Skills探索、扩展、进化框架，其核心原则是：**万物皆可为Skill • Skill在学习中不断自我进化 • 提升AI Agent认知能力**。服务于OpenClaw、Claude Code、Codex、Cursor等智能体系统，EXO将任何资源——网页、文档、视频、代码、数据集等——转化为结构化、可复用的Skill内容。通过智能学习和持续的自我进化，Skill会随着时间不断成长和改进，显著提升AI Agent的认知能力。
+EXO是一个革命性的AI Agent Skills探索、扩展、进化智能引擎，其核心原则是：**万物皆可为Skill • Skill在学习中不断自我进化 • 提升AI Agent认知能力**。服务于OpenClaw、Claude Code、Codex、Cursor等智能体系统，EXO将任何资源——网页、文档、视频、代码、数据集等——转化为结构化、可复用的Skill内容。通过智能学习和持续的自我进化，Skill会随着时间不断成长和改进，显著提升AI Agent的认知能力。
 
 EXO的核心理念是知识不应是静态的。每一个用EXO创建的Skill都能从交互中持续学习，通过反思来自我完善，并不断进化，变得更强大、更全面，更好地适应AI Agent不断变化的需求。
 
