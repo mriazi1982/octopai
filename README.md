@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <strong>An AI Agent Skills Exploration, Extension, and Evolution Framework</strong>
+  <strong>An AI Agent Skills Exploration, Extension, and Evolution Intelligence Engine</strong>
 </p>
 
 <p align="center">
