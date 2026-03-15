@@ -1,32 +1,32 @@
 """
-EXO High-Level API
+Octopai High-Level API
 
-This module provides a simplified, high-level API for working with EXO.
+This module provides a simplified, high-level API for working with Octopai.
 """
 
 from typing import Optional, List, Union, Dict, Any
-from exo.core.converter import URLConverter
-from exo.core.creator import SkillCreator
-from exo.core.evolver import SkillEvolver
-from exo.core.resource_parser import (
+from octopai.core.converter import URLConverter
+from octopai.core.creator import SkillCreator
+from octopai.core.evolver import SkillEvolver
+from octopai.core.resource_parser import (
     ResourceParser,
     ParsedResource,
     parse_resource,
     parse_to_skill_resource
 )
-from exo.core.skill_hub import SkillHub, Skill
+from octopai.core.skill_hub import SkillHub, Skill
 
 
-class EXO:
+class Octopai:
     """
-    EXO - High-level API for AI Agent skill development
+    Octopai - High-level API for AI Agent skill development
     
-    This class provides a unified interface for all EXO functionality.
+    This class provides a unified interface for all Octopai functionality.
     """
     
     def __init__(self, model_provider: str = "openrouter", model: str = "openai/gpt-5.4", api_key: Optional[str] = None, skill_hub_dir: str = "./SkillHub"):
         """
-        Initialize EXO API
+        Initialize Octopai API
         
         Args:
             model_provider: Model provider to use
@@ -300,7 +300,7 @@ class EXO:
     
     def process(self, input_data: Union[str, List[str]], operation: str = "convert", **kwargs) -> Union[str, List[str], ParsedResource, List[ParsedResource], Skill, List[Skill]]:
         """
-        Generic method for any EXO operation
+        Generic method for any Octopai operation
         
         Args:
             input_data: The input data to process
@@ -342,8 +342,8 @@ def convert(url: str, output_path: Optional[str] = None, use_crawler: bool = Fal
     Returns:
         The converted Markdown content
     """
-    exo = EXO()
-    return exo.convert_url(url, output_path, use_crawler)
+    octopai = Octopai()
+    return octopai.convert_url(url, output_path, use_crawler)
 
 
 def parse(file_path: str) -> ParsedResource:
@@ -356,8 +356,8 @@ def parse(file_path: str) -> ParsedResource:
     Returns:
         ParsedResource
     """
-    exo = EXO()
-    return exo.parse_file(file_path)
+    octopai = Octopai()
+    return octopai.parse_file(file_path)
 
 
 def create(prompt: str, name: Optional[str] = None, output_path: Optional[str] = None, resources: Optional[List[str]] = None) -> str:
@@ -373,8 +373,8 @@ def create(prompt: str, name: Optional[str] = None, output_path: Optional[str] =
     Returns:
         The generated skill content
     """
-    exo = EXO()
-    return exo.create_skill(prompt, name, output_path, resources)
+    octopai = Octopai()
+    return octopai.create_skill(prompt, name, output_path, resources)
 
 
 def evolve(skill_path: str, prompt: str, use_engine: bool = True, iterations: int = 3) -> str:
@@ -390,13 +390,13 @@ def evolve(skill_path: str, prompt: str, use_engine: bool = True, iterations: in
     Returns:
         The evolved skill content
     """
-    exo = EXO()
-    return exo.evolve_skill(skill_path, prompt, use_engine, iterations)
+    octopai = Octopai()
+    return octopai.evolve_skill(skill_path, prompt, use_engine, iterations)
 
 
 def process(input_data: Union[str, List[str]], operation: str = "convert", **kwargs) -> Union[str, List[str], ParsedResource, List[ParsedResource], Skill, List[Skill]]:
     """
-    Convenience function for any EXO operation
+    Convenience function for any Octopai operation
     
     Args:
         input_data: The input data to process
@@ -406,8 +406,8 @@ def process(input_data: Union[str, List[str]], operation: str = "convert", **kwa
     Returns:
         The result of the operation
     """
-    exo = EXO()
-    return exo.process(input_data, operation, **kwargs)
+    octopai = Octopai()
+    return octopai.process(input_data, operation, **kwargs)
 
 
 def hub_create(
@@ -434,8 +434,8 @@ def hub_create(
     Returns:
         Created Skill object
     """
-    exo = EXO()
-    return exo.create_skill_in_hub(name, description, prompt, tags, category, author, resources)
+    octopai = Octopai()
+    return octopai.create_skill_in_hub(name, description, prompt, tags, category, author, resources)
 
 
 def hub_get(skill_id: str) -> Optional[Skill]:
@@ -448,8 +448,8 @@ def hub_get(skill_id: str) -> Optional[Skill]:
     Returns:
         Skill object or None
     """
-    exo = EXO()
-    return exo.get_skill_from_hub(skill_id)
+    octopai = Octopai()
+    return octopai.get_skill_from_hub(skill_id)
 
 
 def hub_search(
@@ -470,8 +470,8 @@ def hub_search(
     Returns:
         List of matching Skill objects
     """
-    exo = EXO()
-    return exo.search_skills_in_hub(query, tags, category, limit)
+    octopai = Octopai()
+    return octopai.search_skills_in_hub(query, tags, category, limit)
 
 
 def hub_list(
@@ -490,8 +490,8 @@ def hub_list(
     Returns:
         List of Skill objects
     """
-    exo = EXO()
-    return exo.list_skills_in_hub(category, tags, limit)
+    octopai = Octopai()
+    return octopai.list_skills_in_hub(category, tags, limit)
 
 
 def hub_stats() -> Dict[str, Any]:
@@ -501,5 +501,5 @@ def hub_stats() -> Dict[str, Any]:
     Returns:
         Dictionary with statistics
     """
-    exo = EXO()
-    return exo.get_skill_hub_stats()
+    octopai = Octopai()
+    return octopai.get_skill_hub_stats()
