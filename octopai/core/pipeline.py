@@ -1,7 +1,7 @@
 """
-EXO Pipeline - Unified Skill Development Workflow
+Octopai Pipeline - Unified Skill Development Workflow
 
-This module provides EXO's proprietary unified pipeline that orchestrates
+This module provides Octopai's proprietary unified pipeline that orchestrates
 the complete skill development lifecycle from creation through optimization
 to packaging and management.
 """
@@ -12,21 +12,21 @@ from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
 
-from exo.core.skill_factory import SkillFactory, SkillDefinition, SkillType
-from exo.core.evolution_engine import EvolutionEngine, EvolutionConfig
-from exo.core.skill_packager import SkillPackager, PackageConfig
-from exo.core.skill_hub import SkillHub, Skill
-from exo.core.experience_tracker import (
+from octopai.core.skill_factory import SkillFactory, SkillDefinition, SkillType
+from octopai.core.evolution_engine import EvolutionEngine, EvolutionConfig
+from octopai.core.skill_packager import SkillPackager, PackageConfig
+from octopai.core.skill_hub import SkillHub, Skill
+from octopai.core.experience_tracker import (
     ExperienceTracker, 
     InteractionType, 
     InteractionOutcome
 )
-from exo.utils.helpers import write_file
+from octopai.utils.helpers import write_file
 import shutil
 
 
 class PipelineStage(Enum):
-    """Stages in the EXO pipeline"""
+    """Stages in the Octopai pipeline"""
     CREATION = "creation"
     OPTIMIZATION = "optimization"
     PACKAGING = "packaging"
@@ -60,7 +60,7 @@ class PipelineResult:
 
 @dataclass
 class PipelineConfig:
-    """Configuration for the EXO pipeline"""
+    """Configuration for the Octopai pipeline"""
     auto_optimize: bool = True
     auto_package: bool = True
     auto_validate: bool = True
@@ -71,11 +71,11 @@ class PipelineConfig:
     experience_tracking: bool = True
 
 
-class EXOPipeline:
+class OctopaiPipeline:
     """
-    EXO's Unified Pipeline - Complete Skill Development Orchestration
+    Octopai's Unified Pipeline - Complete Skill Development Orchestration
     
-    Orchestrates the entire skill development lifecycle through EXO's
+    Orchestrates the entire skill development lifecycle through Octopai's
     proprietary pipeline, providing a seamless, end-to-end experience.
     """
     
