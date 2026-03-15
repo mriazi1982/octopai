@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <strong>The Skill Evolution Intelligence Engine for AI Agents. 🚀</strong>
+  <strong>The Skill Evolution Intelligence Engine for AI Agents. 🐙</strong>
 </p>
 
 <p align="center">
