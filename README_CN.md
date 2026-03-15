@@ -1,10 +1,10 @@
 <div align="center">
   
-<img src="./assets/EXO.png" alt="EXO Logo" width="75%"/>
+<img src="./assets/Octopai.png" alt="Octopai Logo" width="75%"/>
 
 
 <p align="center">
-  <h1 align="center">EXO</h1>
+  <h1 align="center">Octopai</h1>
 </p>
 
 <p align="center">
@@ -37,17 +37,17 @@
 
 ## 概述
 
-EXO是一个革命性的AI Agent Skills探索、扩展、进化智能引擎，其核心原则是：**万物皆可为Skill，Skill在学习中不断自我进化，提升AI Agent认知能力。**。服务于OpenClaw、Claude Code、Codex、Cursor等智能体系统，EXO将任何资源——网页、文档、视频、代码、数据集等——转化为结构化、可复用的Skill内容。通过智能学习和持续的自我进化，Skill会随着时间不断成长和改进，显著提升AI Agent的认知能力。
+Octopai是一个革命性的AI Agent Skills探索、扩展、进化智能引擎，其核心原则是：**万物皆可为Skill，Skill在学习中不断自我进化，提升AI Agent认知能力。**。服务于OpenClaw、Claude Code、Codex、Cursor等智能体系统，EXO将任何资源——网页、文档、视频、代码、数据集等——转化为结构化、可复用的Skill内容。通过智能学习和持续的自我进化，Skill会随着时间不断成长和改进，显著提升AI Agent的认知能力。
 
-EXO的核心理念是知识不应是静态的。每一个用EXO创建的Skill都能从交互中持续学习，通过反思来自我完善，并不断进化，变得更强大、更全面，更好地适应AI Agent不断变化的需求。
+Octopai的核心理念是知识不应是静态的。每一个用Octopai创建的Skill都能从交互中持续学习，通过反思来自我完善，并不断进化，变得更强大、更全面，更好地适应AI Agent不断变化的需求。
 
 ## 核心理念
 
-EXO的革命性理念围绕我们的基础使命和原则展开：
+Octopai的革命性理念围绕我们的基础使命和原则展开：
 
 #### 使命：探索、扩展、进化AI Agent的认知
 
-EXO的核心理念是通过三大支柱提升AI Agent的认知能力：
+Octopai的核心理念是通过三大支柱提升AI Agent的认知能力：
 
 - **探索**互联网上海量的知识和各种文件格式的资源
 - **扩展**AI Agent通过结构化、可复用的技能的能力
@@ -55,12 +55,12 @@ EXO的核心理念是通过三大支柱提升AI Agent的认知能力：
 
 #### 原则：万物皆可为Skill，Skill在学习中不断进化
 
-EXO的突破性方法建立在两个变革性原则之上：
+Octopai的突破性方法建立在两个变革性原则之上：
 
 - **万物皆可为Skill**：任何资源——网页、PDF、视频、代码、数据集、文章——都可以转化为结构化的、AI就绪的Skill
 - **Skill在学习中不断进化**：每一个Skill都从使用、反馈和交互中持续学习，随着时间变得更加强大
 
-这些原则和支柱共同构成了EXO的革命性生态系统，在这里万物皆可为Skill，每一个Skill都持续进化以扩展AI Agent的认知。
+这些原则和支柱共同构成了Octopai的革命性生态系统，在这里万物皆可为Skill，每一个Skill都持续进化以扩展AI Agent的认知。
 
 
 ## ✨ 核心功能
@@ -282,7 +282,7 @@ exo/
 
 ## 💡 技能进化系统
 
-EXO 的进化引擎使用复杂的三阶段管道：
+Octopai 的进化引擎使用复杂的三阶段管道：
 
 ```
 ┌────────────┐      ┌────────────┐      ┌────────────┐
@@ -315,16 +315,16 @@ EXO 的进化引擎使用复杂的三阶段管道：
 如果您喜欢这个项目，请 ⭐ 给仓库加星。您的支持帮助我们成长！
 
 <p align="center">
-  <a href="https://star-history.com/#Yuan-ManX/EXO&Date">
-    <img src="https://api.star-history.com/svg?repos=Yuan-ManX/EXO&type=Date" />
+  <a href="https://star-history.com/#Yuan-ManX/octopai&Date">
+    <img src="https://api.star-history.com/svg?repos=Yuan-ManX/octopai&type=Date" />
   </a>
 </p>
 
 
 ## 📞 支持与社区
 
-- **问题**：[GitHub Issues](https://github.com/Yuan-ManX/EXO/issues)
+- **问题**：[GitHub Issues](https://github.com/Yuan-ManX/octopai/issues)
 - **文档**：[docs/](./docs/README.md)
 
 
-**EXO** - 赋能AI Agent探索、扩展和进化其认知能力。
+**Octopai** - 赋能AI Agent探索、扩展和进化其认知能力。
