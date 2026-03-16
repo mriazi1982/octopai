@@ -321,8 +321,8 @@ We welcome contributions! Please see our contribution guidelines (coming soon) f
 If you like this project, please ⭐ star the repo. Your support helps us grow!
 
 <p align="center">
-  <a href="https://star-history.com/#Yuan-ManX/EXO&Date">
-    <img src="https://api.star-history.com/svg?repos=Yuan-ManX/EXO&type=Date" />
+  <a href="https://star-history.com/#Yuan-ManX/Octopai&Date">
+    <img src="https://api.star-history.com/svg?repos=Yuan-ManX/Octopai&type=Date" />
   </a>
 </p>
 
