@@ -24,6 +24,15 @@ from octopai.api_integration.schemas import (
     CreateSkillFromFilesRequest,
     CreateSkillFromPromptRequest,
     OptimizeSkillRequest,
+    UpdateSkillMetadataRequest,
+    CreateCollectionRequest,
+    AddRatingRequest,
+    VersionDiffRequest,
+    RollbackRequest,
+    PublishSkillRequest,
+    CreateCompositionRequest,
+    BindSkillRequest,
+    SemanticSearchQuery,
 )
 
 
@@ -281,6 +290,285 @@ async def get_stats():
     """Get SkillHub statistics"""
     try:
         return octopai_api.octopai.get_skill_hub_stats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/skills/{skill_id}/metadata")
+async def update_skill_metadata_endpoint(skill_id: str, request: UpdateSkillMetadataRequest):
+    """Update skill metadata"""
+    try:
+        request.skill_id = skill_id
+        result = octopai_api.update_skill_metadata(request)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/collections")
+async def create_collection_endpoint(request: CreateCollectionRequest):
+    """Create a new skill collection"""
+    try:
+        result = octopai_api.create_collection(request)
+        return result.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/collections")
+async def list_collections_endpoint():
+    """List all collections"""
+    try:
+        result = octopai_api.list_collections()
+        return result.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/collections/{collection_id}")
+async def get_collection_endpoint(collection_id: str):
+    """Get a specific collection"""
+    try:
+        result = octopai_api.get_collection(collection_id)
+        if not result:
+            raise HTTPException(status_code=404, detail="Collection not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/collections/{collection_id}/skills/{skill_id}")
+async def add_skill_to_collection_endpoint(collection_id: str, skill_id: str):
+    """Add a skill to a collection"""
+    try:
+        success = octopai_api.add_skill_to_collection(collection_id, skill_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Collection or skill not found")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/collections/{collection_id}/skills/{skill_id}")
+async def remove_skill_from_collection_endpoint(collection_id: str, skill_id: str):
+    """Remove a skill from a collection"""
+    try:
+        success = octopai_api.remove_skill_from_collection(collection_id, skill_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Collection or skill not found")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/collections/{collection_id}")
+async def delete_collection_endpoint(collection_id: str):
+    """Delete a collection"""
+    try:
+        success = octopai_api.delete_collection(collection_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Collection not found")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/{skill_id}/ratings")
+async def add_rating_endpoint(skill_id: str, request: AddRatingRequest):
+    """Add a rating to a skill"""
+    try:
+        request.skill_id = skill_id
+        result = octopai_api.add_rating(request)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/skills/{skill_id}/ratings")
+async def get_ratings_endpoint(skill_id: str):
+    """Get all ratings for a skill"""
+    try:
+        ratings = octopai_api.get_ratings(skill_id)
+        return [r.to_dict() for r in ratings]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/{skill_id}/diff")
+async def compute_version_diff_endpoint(skill_id: str, request: VersionDiffRequest):
+    """Compute version difference"""
+    try:
+        request.skill_id = skill_id
+        result = octopai_api.compute_version_diff(request)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill or versions not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/{skill_id}/rollback")
+async def rollback_skill_endpoint(skill_id: str, request: RollbackRequest):
+    """Rollback a skill to a previous version"""
+    try:
+        request.skill_id = skill_id
+        result = octopai_api.rollback_skill(request)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill or version not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/{skill_id}/publish")
+async def publish_skill_endpoint(skill_id: str, request: PublishSkillRequest):
+    """Publish a skill"""
+    try:
+        request.skill_id = skill_id
+        result = octopai_api.publish_skill(request)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/{skill_id}/deprecate")
+async def deprecate_skill_endpoint(skill_id: str):
+    """Deprecate a skill"""
+    try:
+        result = octopai_api.deprecate_skill(skill_id)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/{skill_id}/archive")
+async def archive_skill_endpoint(skill_id: str):
+    """Archive a skill"""
+    try:
+        result = octopai_api.archive_skill(skill_id)
+        if not result:
+            raise HTTPException(status_code=404, detail="Skill not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/compositions")
+async def create_composition_endpoint(request: CreateCompositionRequest):
+    """Create a context composition"""
+    try:
+        result = octopai_api.create_composition(request)
+        return result.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/compositions")
+async def list_compositions_endpoint():
+    """List all compositions"""
+    try:
+        result = octopai_api.list_compositions()
+        return result.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/compositions/{composition_id}")
+async def get_composition_endpoint(composition_id: str):
+    """Get a specific composition"""
+    try:
+        result = octopai_api.get_composition(composition_id)
+        if not result:
+            raise HTTPException(status_code=404, detail="Composition not found")
+        return result.to_dict()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/compositions/{composition_id}/slots")
+async def add_slot_to_composition_endpoint(composition_id: str, slot: dict):
+    """Add a slot to a composition"""
+    try:
+        from octopai.api_integration.schemas import ContextSlotSchema
+        slot_schema = ContextSlotSchema.from_dict(slot)
+        success = octopai_api.add_slot_to_composition(composition_id, slot_schema)
+        if not success:
+            raise HTTPException(status_code=404, detail="Composition not found")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/compositions/{composition_id}/slots/{slot_id}/bind")
+async def bind_skill_to_slot_endpoint(composition_id: str, slot_id: str, request: BindSkillRequest):
+    """Bind a skill to a composition slot"""
+    try:
+        request.composition_id = composition_id
+        request.slot_id = slot_id
+        success = octopai_api.bind_skill_to_slot(request)
+        if not success:
+            raise HTTPException(status_code=404, detail="Composition, slot, or skill not found")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/compositions/{composition_id}")
+async def delete_composition_endpoint(composition_id: str):
+    """Delete a composition"""
+    try:
+        success = octopai_api.delete_composition(composition_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Composition not found")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/skills/search/semantic")
+async def semantic_search_endpoint(query: SemanticSearchQuery):
+    """Enhanced semantic search for skills"""
+    try:
+        result = octopai_api.semantic_search(query)
+        return result.to_dict()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
