@@ -5,9 +5,10 @@ This module provides Octopai's proprietary skill creation system that
 transforms diverse resources into structured, AI-ready skills through
 intelligent analysis, evaluation, and optimization.
 
-Based on skill-creator's full-lifecycle engineering framework:
+Octopai's Full-Lifecycle Engineering Framework:
 - Analysis: Deep understanding of source content
-- Evaluation: Quantitative and qualitative quality assessment
+- Generation: Initial skill content creation
+- Evaluation: Comprehensive quality assessment
 - Optimization: Targeted improvements based on evaluation
 - Validation: Ensure skill readiness for AI Agent consumption
 """
@@ -37,7 +38,12 @@ __all__ = [
     'SkillDefinition',
     'SkillVersion',
     'SkillQualityEvaluator',
-    'SkillOptimizer'
+    'SkillOptimizer',
+    'SkillTemplate',
+    'SkillInteractionPrototype',
+    'EnhancedQualityEvaluator',
+    'create_skill_with_template',
+    'generate_skill_prototype'
 ]
 
 
@@ -72,6 +78,9 @@ class SkillQualityMetrics:
     example_coverage: float = 0.0
     troubleshooting_coverage: float = 0.0
     best_practices_coverage: float = 0.0
+    semantic_coherence: float = 0.0
+    practical_utility: float = 0.0
+    adaptability_score: float = 0.0
     overall_score: float = 0.0
     quality_level: SkillQualityLevel = SkillQualityLevel.DRAFT
     recommendations: List[str] = field(default_factory=list)
@@ -86,6 +95,9 @@ class SkillQualityMetrics:
             "example_coverage": self.example_coverage,
             "troubleshooting_coverage": self.troubleshooting_coverage,
             "best_practices_coverage": self.best_practices_coverage,
+            "semantic_coherence": self.semantic_coherence,
+            "practical_utility": self.practical_utility,
+            "adaptability_score": self.adaptability_score,
             "overall_score": self.overall_score,
             "quality_level": self.quality_level.value,
             "recommendations": self.recommendations,
@@ -1273,3 +1285,428 @@ If you encounter issues:
         )
         
         return skill_def
+
+
+class SkillTemplate:
+    """
+    Smart Skill Template - Intelligent template system for rapid skill creation
+    
+    Provides pre-built, customizable templates for common skill types,
+    enabling rapid skill generation with intelligent defaults.
+    """
+    
+    TEMPLATES = {
+        'tutorial': {
+            'sections': ['Overview', 'Prerequisites', 'Step-by-Step Guide', 'Examples', 'Best Practices', 'Troubleshooting'],
+            'description': 'A step-by-step tutorial for learning a specific skill',
+            'tags': ['tutorial', 'learning', 'guide']
+        },
+        'api_integration': {
+            'sections': ['Overview', 'Authentication', 'Endpoints', 'Request Examples', 'Response Handling', 'Error Handling', 'Best Practices'],
+            'description': 'API integration guide with endpoint documentation',
+            'tags': ['api', 'integration', 'rest']
+        },
+        'data_processing': {
+            'sections': ['Overview', 'Data Format', 'Processing Pipeline', 'Transformation Examples', 'Validation', 'Performance Tips'],
+            'description': 'Data processing and transformation workflow',
+            'tags': ['data', 'processing', 'transformation']
+        },
+        'troubleshooting': {
+            'sections': ['Problem Overview', 'Common Symptoms', 'Root Causes', 'Solutions', 'Prevention', 'Additional Resources'],
+            'description': 'Troubleshooting guide for common issues',
+            'tags': ['troubleshooting', 'debugging', 'support']
+        },
+        'reference': {
+            'sections': ['Overview', 'Concepts', 'API Reference', 'Configuration', 'Examples', 'FAQ'],
+            'description': 'Comprehensive reference documentation',
+            'tags': ['reference', 'documentation', 'manual']
+        }
+    }
+    
+    @classmethod
+    def get_template(cls, template_type: str) -> Optional[Dict[str, Any]]:
+        """
+        Get a skill template by type
+        
+        Args:
+            template_type: Type of template to retrieve
+            
+        Returns:
+            Template configuration or None if not found
+        """
+        return cls.TEMPLATES.get(template_type.lower())
+    
+    @classmethod
+    def list_templates(cls) -> List[str]:
+        """
+        List all available template types
+        
+        Returns:
+            List of template type names
+        """
+        return list(cls.TEMPLATES.keys())
+    
+    @classmethod
+    def generate_skill_structure(cls, template_type: str, name: str, description: str) -> str:
+        """
+        Generate a skill structure from a template
+        
+        Args:
+            template_type: Type of template to use
+            name: Name of the skill
+            description: Description of the skill
+            
+        Returns:
+            Generated skill content structure
+        """
+        template = cls.get_template(template_type)
+        if not template:
+            template = cls.TEMPLATES['reference']
+        
+        sections_content = []
+        for section in template['sections']:
+            sections_content.append(f"## {section}\n\n[Content for {section} goes here]\n")
+        
+        joined_sections = '\n'.join(sections_content)
+        return f"""# {name}
+
+{description}
+
+{joined_sections}
+"""
+
+
+class SkillInteractionPrototype:
+    """
+    Skill Interaction Prototype - Generates interactive usage examples
+    
+    Creates executable, interactive prototypes that demonstrate
+    skill usage in real-world scenarios.
+    """
+    
+    def __init__(self, config: Config):
+        self.config = config
+    
+    def generate_prototype(self, skill_def: SkillDefinition, scenario: str = "basic") -> str:
+        """
+        Generate an interactive prototype for a skill
+        
+        Args:
+            skill_def: Skill definition to prototype
+            scenario: Type of scenario to generate
+            
+        Returns:
+            Interactive prototype code
+        """
+        skill_type = skill_def.metadata.skill_type.value
+        
+        if scenario == "basic":
+            return self._generate_basic_prototype(skill_def)
+        elif scenario == "advanced":
+            return self._generate_advanced_prototype(skill_def)
+        elif scenario == "test":
+            return self._generate_test_prototype(skill_def)
+        else:
+            return self._generate_basic_prototype(skill_def)
+    
+    def _generate_basic_prototype(self, skill_def: SkillDefinition) -> str:
+        """Generate basic usage prototype"""
+        return f'''"""
+Basic Usage Prototype for {skill_def.metadata.name}
+
+This script demonstrates the basic usage of the skill.
+"""
+
+def demonstrate_basic_usage():
+    """Demonstrate basic skill usage"""
+    print(f"Using skill: {skill_def.metadata.name}")
+    print(f"Description: {skill_def.metadata.description}")
+    
+    # Basic usage example
+    result = apply_skill("sample input")
+    print(f"Result: {{result}}")
+
+def apply_skill(input_data):
+    """Apply the skill to input data"""
+    # Implementation based on skill content
+    return f"Processed: {{input_data}}"
+
+if __name__ == "__main__":
+    demonstrate_basic_usage()
+'''
+    
+    def _generate_advanced_prototype(self, skill_def: SkillDefinition) -> str:
+        """Generate advanced usage prototype"""
+        return f'''"""
+Advanced Usage Prototype for {skill_def.metadata.name}
+
+This script demonstrates advanced usage patterns and scenarios.
+"""
+
+class SkillAdvancedUsage:
+    """Advanced usage patterns for the skill"""
+    
+    def __init__(self):
+        self.skill_name = "{skill_def.metadata.name}"
+        self.state = {{}}
+    
+    def process_batch(self, inputs):
+        """Process multiple inputs in batch"""
+        results = []
+        for input_data in inputs:
+            result = self._process_single(input_data)
+            results.append(result)
+        return results
+    
+    def _process_single(self, input_data):
+        """Process a single input"""
+        return f"Processed: {{input_data}}"
+    
+    def with_configuration(self, config):
+        """Apply custom configuration"""
+        self.state.update(config)
+        return self
+
+def demonstrate_advanced_usage():
+    """Demonstrate advanced skill usage"""
+    usage = SkillAdvancedUsage()
+    
+    # Batch processing
+    inputs = ["input1", "input2", "input3"]
+    results = usage.process_batch(inputs)
+    print(f"Batch results: {{results}}")
+    
+    # With configuration
+    custom = usage.with_configuration({{"mode": "advanced"}})
+    print(f"Custom config applied")
+
+if __name__ == "__main__":
+    demonstrate_advanced_usage()
+'''
+    
+    def _generate_test_prototype(self, skill_def: SkillDefinition) -> str:
+        """Generate test prototype"""
+        return f'''"""
+Test Prototype for {skill_def.metadata.name}
+
+This script contains comprehensive tests for the skill.
+"""
+
+import unittest
+
+class TestSkill(unittest.TestCase):
+    """Test cases for the skill"""
+    
+    def setUp(self):
+        """Set up test environment"""
+        self.skill_name = "{skill_def.metadata.name}"
+    
+    def test_basic_functionality(self):
+        """Test basic skill functionality"""
+        result = apply_skill("test input")
+        self.assertIsNotNone(result)
+        self.assertIn("Processed", result)
+    
+    def test_edge_cases(self):
+        """Test edge cases"""
+        edge_cases = ["", None, "special chars !@#$%"]
+        for case in edge_cases:
+            with self.subTest(case=case):
+                result = apply_skill(case)
+                self.assertIsNotNone(result)
+    
+    def test_performance(self):
+        """Test performance characteristics"""
+        import time
+        start = time.time()
+        for i in range(100):
+            apply_skill(f"test {{i}}")
+        duration = time.time() - start
+        self.assertLess(duration, 5.0)  # Should complete in under 5 seconds
+
+def apply_skill(input_data):
+    """Apply the skill to input data"""
+    if input_data is None:
+        return "Processed: None"
+    return f"Processed: {{str(input_data)}}"
+
+if __name__ == "__main__":
+    unittest.main()
+'''
+
+
+class EnhancedQualityEvaluator(SkillQualityEvaluator):
+    """
+    Enhanced Quality Evaluator - Advanced quality assessment with AI-powered insights
+    
+    Extends the base evaluator with more sophisticated metrics including
+    semantic coherence, practical utility, and adaptability scoring.
+    """
+    
+    def __init__(self):
+        super().__init__()
+        self.semantic_keywords = {
+            'action_verbs': ['create', 'generate', 'transform', 'analyze', 'process', 'validate', 'optimize'],
+            'utility_indicators': ['use', 'apply', 'implement', 'deploy', 'integrate'],
+            'complexity_markers': ['however', 'although', 'nevertheless', 'additionally', 'furthermore']
+        }
+    
+    def evaluate(self, content: str) -> SkillQualityMetrics:
+        """
+        Enhanced evaluation with additional metrics
+        
+        Args:
+            content: Skill content to evaluate
+            
+        Returns:
+            Comprehensive quality metrics with enhanced insights
+        """
+        metrics = super().evaluate(content)
+        
+        metrics.semantic_coherence = self._assess_semantic_coherence(content)
+        metrics.practical_utility = self._assess_practical_utility(content)
+        metrics.adaptability_score = self._assess_adaptability(content)
+        
+        metrics.overall_score = self._calculate_enhanced_overall_score(metrics)
+        
+        return metrics
+    
+    def _assess_semantic_coherence(self, content: str) -> float:
+        """Assess semantic coherence and flow"""
+        score = 0.5
+        content_lower = content.lower()
+        words = content_lower.split()
+        
+        transition_words = ['however', 'therefore', 'furthermore', 'additionally', 'moreover', 'thus', 'hence']
+        transition_count = sum(1 for word in transition_words if word in content_lower)
+        
+        if transition_count >= 3:
+            score += 0.2
+        if transition_count >= 5:
+            score += 0.15
+        
+        paragraphs = [p for p in content.split('\n\n') if p.strip()]
+        if 3 <= len(paragraphs) <= 20:
+            score += 0.15
+        
+        return min(score, 1.0)
+    
+    def _assess_practical_utility(self, content: str) -> float:
+        """Assess practical utility and real-world applicability"""
+        score = 0.4
+        content_lower = content.lower()
+        
+        utility_indicators = ['example', 'usage', 'how to', 'step by step', 'implement', 'deploy']
+        indicator_count = sum(1 for indicator in utility_indicators if indicator in content_lower)
+        
+        if indicator_count >= 2:
+            score += 0.2
+        if indicator_count >= 4:
+            score += 0.2
+        
+        code_blocks = content.count('```')
+        if code_blocks >= 2:
+            score += 0.1
+        if code_blocks >= 4:
+            score += 0.1
+        
+        return min(score, 1.0)
+    
+    def _assess_adaptability(self, content: str) -> float:
+        """Assess adaptability and customization potential"""
+        score = 0.5
+        content_lower = content.lower()
+        
+        adaptability_indicators = ['customize', 'configure', 'parameter', 'option', 'modify', 'extend']
+        indicator_count = sum(1 for indicator in adaptability_indicators if indicator in content_lower)
+        
+        if indicator_count >= 2:
+            score += 0.2
+        if indicator_count >= 4:
+            score += 0.2
+        
+        config_sections = ['configuration', 'options', 'parameters', 'settings']
+        if any(section in content_lower for section in config_sections):
+            score += 0.1
+        
+        return min(score, 1.0)
+    
+    def _calculate_enhanced_overall_score(self, metrics: SkillQualityMetrics) -> float:
+        """Calculate enhanced overall score with additional metrics"""
+        base_score = super()._calculate_overall_score(metrics)
+        
+        enhanced_score = base_score * 0.7
+        if hasattr(metrics, 'semantic_coherence'):
+            enhanced_score += metrics.semantic_coherence * 0.1
+        if hasattr(metrics, 'practical_utility'):
+            enhanced_score += metrics.practical_utility * 0.1
+        if hasattr(metrics, 'adaptability_score'):
+            enhanced_score += metrics.adaptability_score * 0.1
+        
+        return min(enhanced_score, 1.0)
+
+
+def create_skill_with_template(
+    template_type: str,
+    name: str,
+    description: str,
+    tags: Optional[List[str]] = None,
+    category: Optional[str] = None,
+    author: Optional[str] = None,
+    skill_type: SkillType = SkillType.GENERAL,
+    auto_optimize: bool = True,
+    target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
+) -> SkillDefinition:
+    """
+    Create a skill using a smart template
+    
+    Args:
+        template_type: Type of template to use
+        name: Name for the skill
+        description: Description of the skill
+        tags: Optional tags for categorization
+        category: Optional category
+        author: Optional author name
+        skill_type: Type of skill being created
+        auto_optimize: Whether to auto-optimize after creation
+        target_quality: Target quality level for optimization
+        
+    Returns:
+        Complete SkillDefinition ready for use
+    """
+    factory = SkillFactory()
+    
+    template_content = SkillTemplate.generate_skill_structure(template_type, name, description)
+    
+    return factory.create_from_text(
+        text=template_content,
+        name=name,
+        description=description,
+        tags=tags,
+        category=category,
+        author=author,
+        skill_type=skill_type,
+        auto_optimize=auto_optimize,
+        target_quality=target_quality
+    )
+
+
+def generate_skill_prototype(
+    skill_def: SkillDefinition,
+    scenario: str = "basic"
+) -> str:
+    """
+    Generate an interactive prototype for a skill
+    
+    Args:
+        skill_def: Skill definition to prototype
+        scenario: Type of scenario to generate
+        
+    Returns:
+        Interactive prototype code
+    """
+    from octopai.utils.config import Config
+    config = Config()
+    prototype = SkillInteractionPrototype(config)
+    return prototype.generate_prototype(skill_def, scenario)
+
