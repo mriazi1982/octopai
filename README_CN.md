@@ -1,6 +1,6 @@
 <div align="center">
   
-<img src="./assets/Octopai.png" alt="Octopai Logo" width="75%"/>
+<img src="./assets/Octopai.png" alt="Octopai Logo" width="65%"/>
 
 
 <p align="center">
