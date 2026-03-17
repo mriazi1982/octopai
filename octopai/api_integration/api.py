@@ -27,8 +27,27 @@ from octopai.api_integration.schemas import (
     SkillListResponse,
     SkillSearchQuery,
     ErrorResponse,
-    IntegrationPipelineStage
+    IntegrationPipelineStage,
+    UpdateSkillMetadataRequest,
+    CreateCollectionRequest,
+    CollectionResponse,
+    CollectionListResponse,
+    AddRatingRequest,
+    RatingResponse,
+    VersionDiffRequest,
+    VersionDiffResponse,
+    RollbackRequest,
+    PublishSkillRequest,
+    ContextSlotSchema,
+    CreateCompositionRequest,
+    CompositionResponse,
+    CompositionListResponse,
+    BindSkillRequest,
+    SemanticSearchQuery,
+    SemanticSearchResult,
+    SemanticSearchResponse
 )
+from octopai.core.skill_hub import SkillStatus, SkillVisibility
 
 
 class TaskStatus(Enum):
@@ -574,6 +593,569 @@ class OctopaiIntegrationAPI:
             TaskStatus.FAILED: IntegrationPipelineStage.FAILED
         }
         return mapping.get(status, IntegrationPipelineStage.PENDING)
+    
+    def update_skill_metadata(
+        self,
+        request: UpdateSkillMetadataRequest
+    ) -> Optional[SkillInfoResponse]:
+        """
+        Update skill metadata
+        
+        Args:
+            request: Update metadata request
+            
+        Returns:
+            Updated SkillInfoResponse or None
+        """
+        status = SkillStatus(request.status) if request.status else None
+        visibility = SkillVisibility(request.visibility) if request.visibility else None
+        
+        skill = self.octopai.update_skill_metadata_in_hub(
+            skill_id=request.skill_id,
+            name=request.name,
+            description=request.description,
+            tags=request.tags,
+            category=request.category,
+            status=status,
+            visibility=visibility,
+            author=request.author,
+            keywords=request.keywords,
+            related_skills=request.related_skills,
+            skill_type=request.skill_type,
+            custom_fields=request.custom_fields
+        )
+        
+        if not skill:
+            return None
+        
+        return self.get_skill_info(skill.metadata.skill_id)
+    
+    def create_collection(
+        self,
+        request: CreateCollectionRequest
+    ) -> CollectionResponse:
+        """
+        Create a skill collection
+        
+        Args:
+            request: Create collection request
+            
+        Returns:
+            Created CollectionResponse
+        """
+        collection = self.octopai.create_collection_in_hub(
+            name=request.name,
+            description=request.description,
+            skill_ids=request.skill_ids,
+            tags=request.tags,
+            author=request.author
+        )
+        
+        return CollectionResponse(
+            collection_id=collection.collection_id,
+            name=collection.name,
+            description=collection.description,
+            skill_ids=collection.skill_ids,
+            tags=collection.tags,
+            created_at=collection.created_at,
+            updated_at=collection.updated_at,
+            author=collection.author
+        )
+    
+    def add_skill_to_collection(
+        self,
+        collection_id: str,
+        skill_id: str
+    ) -> bool:
+        """
+        Add a skill to a collection
+        
+        Args:
+            collection_id: Collection ID
+            skill_id: Skill ID
+            
+        Returns:
+            True if successful
+        """
+        return self.octopai.add_skill_to_collection_in_hub(collection_id, skill_id)
+    
+    def remove_skill_from_collection(
+        self,
+        collection_id: str,
+        skill_id: str
+    ) -> bool:
+        """
+        Remove a skill from a collection
+        
+        Args:
+            collection_id: Collection ID
+            skill_id: Skill ID
+            
+        Returns:
+            True if successful
+        """
+        return self.octopai.remove_skill_from_collection_in_hub(collection_id, skill_id)
+    
+    def get_collection(
+        self,
+        collection_id: str
+    ) -> Optional[CollectionResponse]:
+        """
+        Get a collection by ID
+        
+        Args:
+            collection_id: Collection ID
+            
+        Returns:
+            CollectionResponse or None
+        """
+        collection = self.octopai.get_collection_from_hub(collection_id)
+        if not collection:
+            return None
+        
+        return CollectionResponse(
+            collection_id=collection.collection_id,
+            name=collection.name,
+            description=collection.description,
+            skill_ids=collection.skill_ids,
+            tags=collection.tags,
+            created_at=collection.created_at,
+            updated_at=collection.updated_at,
+            author=collection.author
+        )
+    
+    def list_collections(self) -> CollectionListResponse:
+        """
+        List all collections
+        
+        Returns:
+            CollectionListResponse
+        """
+        collections = self.octopai.list_collections_in_hub()
+        responses = []
+        for collection in collections:
+            responses.append(CollectionResponse(
+                collection_id=collection.collection_id,
+                name=collection.name,
+                description=collection.description,
+                skill_ids=collection.skill_ids,
+                tags=collection.tags,
+                created_at=collection.created_at,
+                updated_at=collection.updated_at,
+                author=collection.author
+            ))
+        
+        return CollectionListResponse(
+            collections=responses,
+            total=len(responses)
+        )
+    
+    def delete_collection(self, collection_id: str) -> bool:
+        """
+        Delete a collection
+        
+        Args:
+            collection_id: Collection ID
+            
+        Returns:
+            True if successful
+        """
+        return self.octopai.delete_collection_from_hub(collection_id)
+    
+    def add_rating(
+        self,
+        request: AddRatingRequest
+    ) -> Optional[RatingResponse]:
+        """
+        Add a rating to a skill
+        
+        Args:
+            request: Add rating request
+            
+        Returns:
+            RatingResponse or None
+        """
+        rating = self.octopai.add_rating_to_skill_in_hub(
+            skill_id=request.skill_id,
+            rating=request.rating,
+            feedback=request.feedback,
+            reviewer=request.reviewer
+        )
+        
+        if not rating:
+            return None
+        
+        return RatingResponse(
+            rating_id=rating.rating_id,
+            skill_id=rating.skill_id,
+            rating=rating.rating,
+            feedback=rating.feedback,
+            reviewer=rating.reviewer,
+            created_at=rating.created_at
+        )
+    
+    def get_ratings(
+        self,
+        skill_id: str
+    ) -> List[RatingResponse]:
+        """
+        Get all ratings for a skill
+        
+        Args:
+            skill_id: Skill ID
+            
+        Returns:
+            List of RatingResponse
+        """
+        ratings = self.octopai.get_ratings_from_hub(skill_id)
+        return [
+            RatingResponse(
+                rating_id=r.rating_id,
+                skill_id=r.skill_id,
+                rating=r.rating,
+                feedback=r.feedback,
+                reviewer=r.reviewer,
+                created_at=r.created_at
+            )
+            for r in ratings
+        ]
+    
+    def compute_version_diff(
+        self,
+        request: VersionDiffRequest
+    ) -> Optional[VersionDiffResponse]:
+        """
+        Compute version diff
+        
+        Args:
+            request: Version diff request
+            
+        Returns:
+            VersionDiffResponse or None
+        """
+        diff = self.octopai.compute_version_diff_in_hub(
+            skill_id=request.skill_id,
+            from_version=request.from_version,
+            to_version=request.to_version
+        )
+        
+        if not diff:
+            return None
+        
+        return VersionDiffResponse(
+            diff_id=diff.diff_id,
+            skill_id=diff.skill_id,
+            from_version=diff.from_version,
+            to_version=diff.to_version,
+            additions=diff.additions,
+            deletions=diff.deletions,
+            modifications=diff.modifications,
+            created_at=diff.created_at
+        )
+    
+    def rollback_skill(
+        self,
+        request: RollbackRequest
+    ) -> Optional[SkillInfoResponse]:
+        """
+        Rollback a skill
+        
+        Args:
+            request: Rollback request
+            
+        Returns:
+            Updated SkillInfoResponse or None
+        """
+        skill = self.octopai.rollback_skill_in_hub(
+            skill_id=request.skill_id,
+            version=request.version,
+            author=request.author
+        )
+        
+        if not skill:
+            return None
+        
+        return self.get_skill_info(skill.metadata.skill_id)
+    
+    def publish_skill(
+        self,
+        request: PublishSkillRequest
+    ) -> Optional[SkillInfoResponse]:
+        """
+        Publish a skill
+        
+        Args:
+            request: Publish request
+            
+        Returns:
+            Updated SkillInfoResponse or None
+        """
+        visibility = SkillVisibility(request.visibility)
+        skill = self.octopai.publish_skill_in_hub(
+            skill_id=request.skill_id,
+            visibility=visibility
+        )
+        
+        if not skill:
+            return None
+        
+        return self.get_skill_info(skill.metadata.skill_id)
+    
+    def deprecate_skill(self, skill_id: str) -> Optional[SkillInfoResponse]:
+        """
+        Deprecate a skill
+        
+        Args:
+            skill_id: Skill ID
+            
+        Returns:
+            Updated SkillInfoResponse or None
+        """
+        skill = self.octopai.deprecate_skill_in_hub(skill_id)
+        if not skill:
+            return None
+        return self.get_skill_info(skill.metadata.skill_id)
+    
+    def archive_skill(self, skill_id: str) -> Optional[SkillInfoResponse]:
+        """
+        Archive a skill
+        
+        Args:
+            skill_id: Skill ID
+            
+        Returns:
+            Updated SkillInfoResponse or None
+        """
+        skill = self.octopai.archive_skill_in_hub(skill_id)
+        if not skill:
+            return None
+        return self.get_skill_info(skill.metadata.skill_id)
+    
+    def create_composition(
+        self,
+        request: CreateCompositionRequest
+    ) -> CompositionResponse:
+        """
+        Create a context composition
+        
+        Args:
+            request: Create composition request
+            
+        Returns:
+            Created CompositionResponse
+        """
+        slots = None
+        if request.slots:
+            from octopai.core.skill_hub import ContextSlot
+            slots = {
+                k: ContextSlot(
+                    slot_id=v.slot_id,
+                    name=v.name,
+                    description=v.description,
+                    required=v.required,
+                    default_skill_id=v.default_skill_id,
+                    allowed_skill_types=v.allowed_skill_types
+                )
+                for k, v in request.slots.items()
+            }
+        
+        composition = self.octopai.create_composition_in_hub(
+            name=request.name,
+            description=request.description,
+            slots=slots
+        )
+        
+        response_slots = {
+            k: ContextSlotSchema(
+                slot_id=v.slot_id,
+                name=v.name,
+                description=v.description,
+                required=v.required,
+                default_skill_id=v.default_skill_id,
+                allowed_skill_types=v.allowed_skill_types
+            )
+            for k, v in composition.slots.items()
+        }
+        
+        return CompositionResponse(
+            composition_id=composition.composition_id,
+            name=composition.name,
+            description=composition.description,
+            slots=response_slots,
+            bindings=composition.bindings,
+            created_at=composition.created_at,
+            updated_at=composition.updated_at
+        )
+    
+    def add_slot_to_composition(
+        self,
+        composition_id: str,
+        slot: ContextSlotSchema
+    ) -> bool:
+        """
+        Add a slot to a composition
+        
+        Args:
+            composition_id: Composition ID
+            slot: Slot to add
+            
+        Returns:
+            True if successful
+        """
+        from octopai.core.skill_hub import ContextSlot
+        context_slot = ContextSlot(
+            slot_id=slot.slot_id,
+            name=slot.name,
+            description=slot.description,
+            required=slot.required,
+            default_skill_id=slot.default_skill_id,
+            allowed_skill_types=slot.allowed_skill_types
+        )
+        return self.octopai.add_slot_to_composition_in_hub(composition_id, context_slot)
+    
+    def bind_skill_to_slot(
+        self,
+        request: BindSkillRequest
+    ) -> bool:
+        """
+        Bind a skill to a slot
+        
+        Args:
+            request: Bind request
+            
+        Returns:
+            True if successful
+        """
+        return self.octopai.bind_skill_to_slot_in_hub(
+            request.composition_id,
+            request.slot_id,
+            request.skill_id
+        )
+    
+    def get_composition(
+        self,
+        composition_id: str
+    ) -> Optional[CompositionResponse]:
+        """
+        Get a composition by ID
+        
+        Args:
+            composition_id: Composition ID
+            
+        Returns:
+            CompositionResponse or None
+        """
+        composition = self.octopai.get_composition_from_hub(composition_id)
+        if not composition:
+            return None
+        
+        response_slots = {
+            k: ContextSlotSchema(
+                slot_id=v.slot_id,
+                name=v.name,
+                description=v.description,
+                required=v.required,
+                default_skill_id=v.default_skill_id,
+                allowed_skill_types=v.allowed_skill_types
+            )
+            for k, v in composition.slots.items()
+        }
+        
+        return CompositionResponse(
+            composition_id=composition.composition_id,
+            name=composition.name,
+            description=composition.description,
+            slots=response_slots,
+            bindings=composition.bindings,
+            created_at=composition.created_at,
+            updated_at=composition.updated_at
+        )
+    
+    def list_compositions(self) -> CompositionListResponse:
+        """
+        List all compositions
+        
+        Returns:
+            CompositionListResponse
+        """
+        compositions = self.octopai.list_compositions_in_hub()
+        responses = []
+        
+        for comp in compositions:
+            response_slots = {
+                k: ContextSlotSchema(
+                    slot_id=v.slot_id,
+                    name=v.name,
+                    description=v.description,
+                    required=v.required,
+                    default_skill_id=v.default_skill_id,
+                    allowed_skill_types=v.allowed_skill_types
+                )
+                for k, v in comp.slots.items()
+            }
+            
+            responses.append(CompositionResponse(
+                composition_id=comp.composition_id,
+                name=comp.name,
+                description=comp.description,
+                slots=response_slots,
+                bindings=comp.bindings,
+                created_at=comp.created_at,
+                updated_at=comp.updated_at
+            ))
+        
+        return CompositionListResponse(
+            compositions=responses,
+            total=len(responses)
+        )
+    
+    def delete_composition(self, composition_id: str) -> bool:
+        """
+        Delete a composition
+        
+        Args:
+            composition_id: Composition ID
+            
+        Returns:
+            True if successful
+        """
+        return self.octopai.delete_composition_from_hub(composition_id)
+    
+    def semantic_search(
+        self,
+        query: SemanticSearchQuery
+    ) -> SemanticSearchResponse:
+        """
+        Enhanced semantic search
+        
+        Args:
+            query: Semantic search query
+            
+        Returns:
+            SemanticSearchResponse
+        """
+        status = SkillStatus(query.status) if query.status else None
+        results = self.octopai.semantic_search_in_hub(
+            query=query.query,
+            tags=query.tags,
+            category=query.category,
+            status=status,
+            limit=query.limit
+        )
+        
+        search_results = []
+        for skill, score in results:
+            info = self.get_skill_info(skill.metadata.skill_id)
+            if info:
+                search_results.append(SemanticSearchResult(
+                    skill=info,
+                    score=score
+                ))
+        
+        return SemanticSearchResponse(
+            results=search_results,
+            total=len(search_results)
+        )
     
     def shutdown(self, wait: bool = True):
         """
