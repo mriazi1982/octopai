@@ -24,7 +24,7 @@ const Home = () => {
           <span className="text-purple-700 text-sm font-medium">Everything Can Be a Skill</span>
         </div>
         <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
-          EXO
+          Octopai
           <span className="block text-2xl md:text-3xl font-normal text-gray-600 mt-2">
             AI Agent Skills Exploration, Extension, and Evolution Framework
           </span>
