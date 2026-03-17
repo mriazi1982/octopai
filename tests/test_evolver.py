@@ -1,6 +1,6 @@
 import os
 import tempfile
-from exo.core.evolver import SkillEvolver
+from octopai.core.evolver import SkillEvolver
 
 
 def test_evolver_initialization():
