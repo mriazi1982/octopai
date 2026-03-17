@@ -1,7 +1,7 @@
 """
-Experience Tracker - EXO's Intelligent Interaction Learning System
+Experience Tracker - Octopai's Intelligent Interaction Learning System
 
-This module provides EXO's proprietary experience tracking system that
+This module provides Octopai's proprietary experience tracking system that
 records, analyzes, and learns from skill interactions to continuously
 improve the skill ecosystem.
 """
@@ -96,10 +96,10 @@ class SkillExperience:
 
 class ExperienceTracker:
     """
-    EXO's Experience Tracker - Intelligent Interaction Learning System
+    Octopai's Experience Tracker - Intelligent Interaction Learning System
     
     Tracks, analyzes, and learns from skill interactions to provide
-    insights and drive continuous improvement in EXO's skill ecosystem.
+    insights and drive continuous improvement in Octopai's skill ecosystem.
     """
     
     def __init__(self, storage_dir: str = "./experiences"):
