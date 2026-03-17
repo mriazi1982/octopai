@@ -7,7 +7,7 @@ Tests the parsing capabilities for various file formats.
 import os
 import tempfile
 import pytest
-from exo.core.resource_parser import (
+from octopai.core.resource_parser import (
     ResourceParser,
     ParsedResource,
     ResourceType,
