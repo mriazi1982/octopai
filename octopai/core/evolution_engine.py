@@ -1,7 +1,7 @@
 """
-Evolution Engine - EXO's Advanced Skill Evolution System
+Evolution Engine - Octopai's Advanced Skill Evolution System
 
-This module provides EXO's proprietary skill optimization and evolution system
+This module provides Octopai's proprietary skill optimization and evolution system
 that continuously improves skills through intelligent reflection, iterative
 refinement, and multi-objective optimization.
 """
@@ -14,9 +14,9 @@ from enum import Enum
 from datetime import datetime
 import hashlib
 
-from exo.utils.config import Config
-from exo.utils.helpers import read_file, write_file
-from exo.core.experience_tracker import InteractionType, InteractionOutcome
+from octopai.utils.config import Config
+from octopai.utils.helpers import read_file, write_file
+from octopai.core.experience_tracker import InteractionType, InteractionOutcome
 import requests
 
 
@@ -224,9 +224,9 @@ class EvolutionConfig:
 
 class EvolutionEngine:
     """
-    EXO's Evolution Engine - Advanced Skill Evolution System.
+    Octopai's Evolution Engine - Advanced Skill Evolution System.
     
-    Provides sophisticated skill optimization through EXO's proprietary
+    Provides sophisticated skill optimization through Octopai's proprietary
     multi-objective evolutionary algorithm with intelligent reflection,
     knowledge integration, and iterative refinement. Features a three-stage
     pipeline: Executor, Reflector, and Optimizer.
@@ -260,7 +260,7 @@ class EvolutionEngine:
         evaluation_tasks: Optional[List[Any]] = None
     ) -> str:
         """
-        Evolve a skill through EXO's evolutionary process
+        Evolve a skill through Octopai's evolutionary process
         
         Args:
             skill_dir: Directory containing the skill to evolve
