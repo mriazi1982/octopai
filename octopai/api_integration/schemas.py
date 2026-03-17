@@ -1,7 +1,7 @@
 """
-EXO Integration Schemas - Data Models for Integration API
+Octopai Integration Schemas - Data Models for Integration API
 
-This module defines standardized data models for EXO's integration API,
+This module defines standardized data models for Octopai's integration API,
 including request/response schemas and data transfer objects.
 """
 
