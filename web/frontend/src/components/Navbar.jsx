@@ -13,9 +13,9 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">E</span>
+                <span className="text-white font-bold text-lg">O</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">EXO</span>
+              <span className="text-xl font-bold text-gray-900">Octopai</span>
             </Link>
             <div className="hidden md:ml-10 md:flex md:space-x-1">
               <Link
