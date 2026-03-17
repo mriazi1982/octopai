@@ -3,23 +3,42 @@ Skill Factory - Octopai's Innovative Skill Creation System
 
 This module provides Octopai's proprietary skill creation system that
 transforms diverse resources into structured, AI-ready skills through
-intelligent analysis and generation.
+intelligent analysis, evaluation, and optimization.
+
+Based on skill-creator's full-lifecycle engineering framework:
+- Analysis: Deep understanding of source content
+- Evaluation: Quantitative and qualitative quality assessment
+- Optimization: Targeted improvements based on evaluation
+- Validation: Ensure skill readiness for AI Agent consumption
 """
 
 import os
 import hashlib
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Callable
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from enum import Enum
+import re
+import uuid
 
 from octopai.utils.config import Config
 from octopai.utils.helpers import read_file, write_file
 from octopai.core.converter import URLConverter
 from octopai.core.resource_parser import ResourceParser
 import requests
-import re
-import uuid
+
+
+__all__ = [
+    'SkillFactory',
+    'SkillType',
+    'SkillQualityLevel',
+    'SkillQualityMetrics',
+    'SkillMetadata',
+    'SkillDefinition',
+    'SkillVersion',
+    'SkillQualityEvaluator',
+    'SkillOptimizer'
+]
 
 
 class SkillType(Enum):
@@ -30,6 +49,49 @@ class SkillType(Enum):
     CREATIVE = "creative"
     RESEARCH = "research"
     CODING = "coding"
+    TROUBLESHOOTING = "troubleshooting"
+    REFERENCE = "reference"
+    TUTORIAL = "tutorial"
+
+
+class SkillQualityLevel(Enum):
+    """Quality levels for skill evaluation"""
+    DRAFT = "draft"
+    BASIC = "basic"
+    GOOD = "good"
+    EXCELLENT = "excellent"
+    PREMIUM = "premium"
+
+
+@dataclass
+class SkillQualityMetrics:
+    """Comprehensive quality metrics for skill evaluation"""
+    completeness_score: float = 0.0
+    readability_score: float = 0.0
+    structure_score: float = 0.0
+    example_coverage: float = 0.0
+    troubleshooting_coverage: float = 0.0
+    best_practices_coverage: float = 0.0
+    overall_score: float = 0.0
+    quality_level: SkillQualityLevel = SkillQualityLevel.DRAFT
+    recommendations: List[str] = field(default_factory=list)
+    strengths: List[str] = field(default_factory=list)
+    gaps: List[str] = field(default_factory=list)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "completeness_score": self.completeness_score,
+            "readability_score": self.readability_score,
+            "structure_score": self.structure_score,
+            "example_coverage": self.example_coverage,
+            "troubleshooting_coverage": self.troubleshooting_coverage,
+            "best_practices_coverage": self.best_practices_coverage,
+            "overall_score": self.overall_score,
+            "quality_level": self.quality_level.value,
+            "recommendations": self.recommendations,
+            "strengths": self.strengths,
+            "gaps": self.gaps
+        }
 
 
 @dataclass
@@ -41,6 +103,7 @@ class SkillVersion:
     author: Optional[str] = None
     change_description: Optional[str] = None
     content_hash: str = ""
+    quality_metrics: Optional[SkillQualityMetrics] = None
     
     def __post_init__(self):
         if not self.content_hash:
@@ -51,11 +114,19 @@ class SkillVersion:
         return hashlib.sha256(content.encode('utf-8')).hexdigest()
     
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        if self.quality_metrics:
+            data['quality_metrics'] = self.quality_metrics.to_dict()
+        return data
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'SkillVersion':
-        return cls(**data)
+        metrics_data = data.pop('quality_metrics', None)
+        version = cls(**data)
+        if metrics_data:
+            metrics_data['quality_level'] = SkillQualityLevel(metrics_data['quality_level'])
+            version.quality_metrics = SkillQualityMetrics(**metrics_data)
+        return version
 
 
 @dataclass
@@ -72,6 +143,8 @@ class SkillMetadata:
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
     license: str = "MIT"
     requirements: List[str] = field(default_factory=list)
+    source_type: Optional[str] = None
+    source_reference: Optional[str] = None
     custom_fields: Dict[str, Any] = field(default_factory=dict)
     
     def to_dict(self) -> Dict[str, Any]:
@@ -103,7 +176,8 @@ class SkillDefinition:
         self,
         content: str,
         author: Optional[str] = None,
-        change_description: Optional[str] = None
+        change_description: Optional[str] = None,
+        quality_metrics: Optional[SkillQualityMetrics] = None
     ) -> SkillVersion:
         """Add a new version of the skill"""
         new_version_num = max([v.version for v in self.versions], default=0) + 1
@@ -112,7 +186,8 @@ class SkillDefinition:
             content=content,
             created_at=datetime.now().isoformat(),
             author=author,
-            change_description=change_description
+            change_description=change_description,
+            quality_metrics=quality_metrics
         )
         self.versions.append(version)
         self.metadata.updated_at = datetime.now().isoformat()
@@ -132,12 +207,396 @@ class SkillDefinition:
         )
 
 
+class SkillQualityEvaluator:
+    """
+    Skill Quality Evaluator - Comprehensive quality assessment
+    
+    Evaluates skills across multiple dimensions to ensure
+    readiness for AI Agent consumption.
+    """
+    
+    def __init__(self):
+        self.required_sections = [
+            "Overview", "Purpose", "Usage", "Examples",
+            "Best Practices", "Troubleshooting"
+        ]
+        self.recommended_sections = [
+            "Prerequisites", "Configuration", "Advanced Topics",
+            "Related Skills", "References"
+        ]
+    
+    def evaluate(self, content: str) -> SkillQualityMetrics:
+        """
+        Evaluate skill content quality
+        
+        Args:
+            content: Skill content to evaluate
+            
+        Returns:
+            Comprehensive quality metrics
+        """
+        metrics = SkillQualityMetrics()
+        
+        metrics.completeness_score = self._assess_completeness(content)
+        metrics.readability_score = self._assess_readability(content)
+        metrics.structure_score = self._assess_structure(content)
+        metrics.example_coverage = self._assess_examples(content)
+        metrics.troubleshooting_coverage = self._assess_troubleshooting(content)
+        metrics.best_practices_coverage = self._assess_best_practices(content)
+        
+        metrics.overall_score = self._calculate_overall_score(metrics)
+        metrics.quality_level = self._determine_quality_level(metrics.overall_score)
+        
+        metrics.recommendations = self._generate_recommendations(content, metrics)
+        metrics.strengths = self._identify_strengths(content, metrics)
+        metrics.gaps = self._identify_gaps(content, metrics)
+        
+        return metrics
+    
+    def _assess_completeness(self, content: str) -> float:
+        """Assess how complete the skill content is"""
+        score = 0.0
+        content_lower = content.lower()
+        
+        for section in self.required_sections:
+            if section.lower() in content_lower:
+                score += 1.0 / len(self.required_sections)
+        
+        for section in self.recommended_sections:
+            if section.lower() in content_lower:
+                score += 0.25 / len(self.recommended_sections)
+        
+        return min(score, 1.0)
+    
+    def _assess_readability(self, content: str) -> float:
+        """Assess readability of the content"""
+        score = 0.5
+        lines = content.split('\n')
+        
+        if any(line.startswith('#') for line in lines):
+            score += 0.15
+        if any(line.startswith('##') for line in lines):
+            score += 0.1
+        if any(line.startswith('###') for line in lines):
+            score += 0.1
+        if 10 < len(lines) < 500:
+            score += 0.15
+        
+        return min(score, 1.0)
+    
+    def _assess_structure(self, content: str) -> float:
+        """Assess the structural quality"""
+        score = 0.4
+        
+        heading_counts = 0
+        for line in content.split('\n'):
+            if line.startswith('#'):
+                heading_counts += 1
+        
+        if heading_counts >= 3:
+            score += 0.2
+        if heading_counts >= 5:
+            score += 0.2
+        if content.count('```') >= 2:
+            score += 0.2
+        
+        return min(score, 1.0)
+    
+    def _assess_examples(self, content: str) -> float:
+        """Assess example coverage"""
+        content_lower = content.lower()
+        score = 0.0
+        
+        if 'example' in content_lower or 'Example' in content:
+            score += 0.5
+        if content.count('```') >= 4:
+            score += 0.3
+        if 'usage' in content_lower or 'Usage' in content:
+            score += 0.2
+        
+        return min(score, 1.0)
+    
+    def _assess_troubleshooting(self, content: str) -> float:
+        """Assess troubleshooting coverage"""
+        content_lower = content.lower()
+        score = 0.0
+        
+        if 'troubleshoot' in content_lower or 'Troubleshoot' in content:
+            score += 0.5
+        if 'faq' in content_lower or 'FAQ' in content:
+            score += 0.3
+        if 'error' in content_lower or 'Error' in content:
+            score += 0.2
+        
+        return min(score, 1.0)
+    
+    def _assess_best_practices(self, content: str) -> float:
+        """Assess best practices coverage"""
+        content_lower = content.lower()
+        score = 0.0
+        
+        if 'best practice' in content_lower or 'Best Practice' in content:
+            score += 0.5
+        if 'recommendation' in content_lower or 'Recommendation' in content:
+            score += 0.3
+        if 'note' in content_lower or 'Note' in content or 'warning' in content_lower or 'Warning' in content:
+            score += 0.2
+        
+        return min(score, 1.0)
+    
+    def _calculate_overall_score(self, metrics: SkillQualityMetrics) -> float:
+        """Calculate weighted overall score"""
+        weights = {
+            'completeness_score': 0.25,
+            'readability_score': 0.15,
+            'structure_score': 0.15,
+            'example_coverage': 0.20,
+            'troubleshooting_coverage': 0.15,
+            'best_practices_coverage': 0.10
+        }
+        
+        total = 0.0
+        for key, weight in weights.items():
+            total += getattr(metrics, key) * weight
+        
+        return total
+    
+    def _determine_quality_level(self, score: float) -> SkillQualityLevel:
+        """Determine quality level from score"""
+        if score >= 0.9:
+            return SkillQualityLevel.PREMIUM
+        elif score >= 0.75:
+            return SkillQualityLevel.EXCELLENT
+        elif score >= 0.6:
+            return SkillQualityLevel.GOOD
+        elif score >= 0.4:
+            return SkillQualityLevel.BASIC
+        else:
+            return SkillQualityLevel.DRAFT
+    
+    def _generate_recommendations(self, content: str, metrics: SkillQualityMetrics) -> List[str]:
+        """Generate improvement recommendations"""
+        recommendations = []
+        content_lower = content.lower()
+        
+        if metrics.completeness_score < 0.7:
+            recommendations.append("Add missing sections: Overview, Purpose, Usage, Examples")
+        if metrics.example_coverage < 0.5:
+            recommendations.append("Include practical code examples and usage patterns")
+        if metrics.troubleshooting_coverage < 0.5:
+            recommendations.append("Add troubleshooting guidance for common issues")
+        if metrics.best_practices_coverage < 0.5:
+            recommendations.append("Include best practices and recommendations")
+        if metrics.structure_score < 0.6:
+            recommendations.append("Improve section organization with clear headings")
+        
+        return recommendations
+    
+    def _identify_strengths(self, content: str, metrics: SkillQualityMetrics) -> List[str]:
+        """Identify skill strengths"""
+        strengths = []
+        content_lower = content.lower()
+        
+        if metrics.example_coverage >= 0.7:
+            strengths.append("Excellent example coverage")
+        if metrics.readability_score >= 0.8:
+            strengths.append("High readability and clear structure")
+        if metrics.troubleshooting_coverage >= 0.7:
+            strengths.append("Comprehensive troubleshooting guidance")
+        if metrics.best_practices_coverage >= 0.7:
+            strengths.append("Well-documented best practices")
+        
+        return strengths
+    
+    def _identify_gaps(self, content: str, metrics: SkillQualityMetrics) -> List[str]:
+        """Identify skill gaps"""
+        gaps = []
+        content_lower = content.lower()
+        
+        if metrics.completeness_score < 0.6:
+            gaps.append("Incomplete coverage of essential sections")
+        if metrics.example_coverage < 0.4:
+            gaps.append("Lacks practical examples")
+        if metrics.structure_score < 0.5:
+            gaps.append("Needs better structural organization")
+        
+        return gaps
+
+
+class SkillOptimizer:
+    """
+    Skill Optimizer - Targeted improvements based on evaluation
+    
+    Optimizes skills using quality evaluation insights.
+    """
+    
+    def __init__(self, config: Config):
+        self.config = config
+    
+    def optimize(
+        self,
+        content: str,
+        metrics: SkillQualityMetrics,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
+    ) -> str:
+        """
+        Optimize skill content based on quality metrics
+        
+        Args:
+            content: Original skill content
+            metrics: Quality evaluation metrics
+            target_quality: Target quality level
+            
+        Returns:
+            Optimized skill content
+        """
+        if metrics.quality_level.value >= target_quality.value:
+            return content
+        
+        return self._generate_optimized_content(content, metrics)
+    
+    def _generate_optimized_content(self, content: str, metrics: SkillQualityMetrics) -> str:
+        """Generate optimized content using LLM"""
+        prompt = self._build_optimization_prompt(content, metrics)
+        
+        headers = {
+            'Authorization': f'Bearer {self.config.OPENROUTER_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            "model": self.config.OCTOPAI_MODEL,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": """You are an expert at skill optimization and improvement.
+Your task is to enhance a skill based on quality evaluation metrics.
+Focus on:
+1. Addressing identified gaps
+2. Building on existing strengths
+3. Adding missing sections
+4. Improving structure and clarity
+5. Adding practical examples
+6. Including troubleshooting guidance
+7. Documenting best practices"""
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.7
+        }
+        
+        try:
+            response = requests.post(
+                self.config.OPENROUTER_API_URL,
+                headers=headers,
+                json=data,
+                timeout=120
+            )
+            response.raise_for_status()
+            result = response.json()
+            return result.get('choices', [{}])[0].get('message', {}).get('content', content)
+        except Exception as e:
+            print(f"Optimization fallback: {e}")
+            return self._build_fallback_optimization(content, metrics)
+    
+    def _build_optimization_prompt(self, content: str, metrics: SkillQualityMetrics) -> str:
+        """Build optimization prompt"""
+        strengths_text = "\n".join([f"- {s}" for s in metrics.strengths])
+        gaps_text = "\n".join([f"- {g}" for g in metrics.gaps])
+        recommendations_text = "\n".join([f"- {r}" for r in metrics.recommendations])
+        
+        return f"""# Skill Optimization Request
+
+## Current Quality Metrics
+- Overall Score: {metrics.overall_score:.2f}
+- Quality Level: {metrics.quality_level.value}
+- Completeness: {metrics.completeness_score:.2f}
+- Readability: {metrics.readability_score:.2f}
+- Structure: {metrics.structure_score:.2f}
+- Examples: {metrics.example_coverage:.2f}
+- Troubleshooting: {metrics.troubleshooting_coverage:.2f}
+- Best Practices: {metrics.best_practices_coverage:.2f}
+
+## Strengths
+{strengths_text if strengths_text else "No specific strengths identified"}
+
+## Gaps
+{gaps_text if gaps_text else "No specific gaps identified"}
+
+## Recommendations
+{recommendations_text if recommendations_text else "No specific recommendations"}
+
+## Current Skill Content
+{content}
+
+Please optimize this skill, focusing on addressing the gaps and recommendations while preserving the strengths."""
+    
+    def _build_fallback_optimization(self, content: str, metrics: SkillQualityMetrics) -> str:
+        """Build fallback optimization when LLM is unavailable"""
+        additions = []
+        
+        if metrics.example_coverage < 0.5:
+            additions.append("""
+## Examples
+
+### Basic Usage
+```python
+# Basic usage example goes here
+```
+
+### Advanced Usage
+```python
+# Advanced usage example goes here
+```
+""")
+        
+        if metrics.troubleshooting_coverage < 0.5:
+            additions.append("""
+## Troubleshooting
+
+### Common Issues
+
+#### Issue 1: [Description]
+**Solution:** [Step-by-step solution]
+
+#### Issue 2: [Description]
+**Solution:** [Step-by-step solution]
+""")
+        
+        if metrics.best_practices_coverage < 0.5:
+            additions.append("""
+## Best Practices
+
+1. [Best Practice 1]
+2. [Best Practice 2]
+3. [Best Practice 3]
+
+## Recommendations
+
+- [Recommendation 1]
+- [Recommendation 2]
+""")
+        
+        return content + "\n" + "\n".join(additions)
+
+
 class SkillFactory:
     """
-    Octopai's Skill Factory - Intelligent Skill Creation System
+    Octopai's Skill Factory - Intelligent Skill Creation System with Full-Lifecycle Engineering
     
     Transforms ANYTHING into structured, high-quality skills through Octopai's 
-    proprietary analysis and generation pipeline. Everything Can Be a Skill!
+    proprietary analysis, evaluation, and optimization pipeline. 
+    Everything Can Be a Skill!
+    
+    Full-Lifecycle Framework:
+    1. Analysis: Deep understanding of source content
+    2. Generation: Initial skill content creation
+    3. Evaluation: Comprehensive quality assessment
+    4. Optimization: Targeted improvements
+    5. Validation: Ensure readiness for AI Agents
     
     Supported input types:
     - Web URLs and websites
@@ -150,6 +609,8 @@ class SkillFactory:
     
     def __init__(self):
         self.config = Config()
+        self.evaluator = SkillQualityEvaluator()
+        self.optimizer = SkillOptimizer(self.config)
     
     def create_from_url(
         self,
@@ -160,10 +621,12 @@ class SkillFactory:
         category: Optional[str] = None,
         author: Optional[str] = None,
         skill_type: SkillType = SkillType.GENERAL,
-        additional_context: Optional[str] = None
+        additional_context: Optional[str] = None,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
-        Create a skill from a web URL
+        Create a skill from a web URL with full-lifecycle engineering
         
         Args:
             url: The web URL to transform
@@ -174,6 +637,8 @@ class SkillFactory:
             author: Optional author name
             skill_type: Type of skill being created
             additional_context: Optional additional context for skill creation
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -191,7 +656,9 @@ class SkillFactory:
             category=category,
             author=author,
             skill_type=skill_type,
-            additional_context=additional_context
+            additional_context=additional_context,
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def create_from_files(
@@ -203,10 +670,12 @@ class SkillFactory:
         category: Optional[str] = None,
         author: Optional[str] = None,
         skill_type: SkillType = SkillType.GENERAL,
-        additional_context: Optional[str] = None
+        additional_context: Optional[str] = None,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
-        Create a skill from one or more files
+        Create a skill from one or more files with full-lifecycle engineering
         
         Args:
             file_paths: List of file paths to process
@@ -217,6 +686,8 @@ class SkillFactory:
             author: Optional author name
             skill_type: Type of skill being created
             additional_context: Optional additional context for skill creation
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -244,7 +715,9 @@ class SkillFactory:
             category=category,
             author=author,
             skill_type=skill_type,
-            additional_context=additional_context
+            additional_context=additional_context,
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def create_from_prompt(
@@ -256,10 +729,12 @@ class SkillFactory:
         category: Optional[str] = None,
         author: Optional[str] = None,
         skill_type: SkillType = SkillType.GENERAL,
-        resources: Optional[List[str]] = None
+        resources: Optional[List[str]] = None,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
-        Create a skill from a descriptive prompt
+        Create a skill from a descriptive prompt with full-lifecycle engineering
         
         Args:
             prompt: Description of what the skill should do
@@ -270,6 +745,8 @@ class SkillFactory:
             author: Optional author name
             skill_type: Type of skill being created
             resources: Optional list of resource files to include
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -301,7 +778,9 @@ class SkillFactory:
             category=category,
             author=author,
             skill_type=skill_type,
-            additional_context=None
+            additional_context=None,
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def _create_skill(
@@ -315,9 +794,11 @@ class SkillFactory:
         category: Optional[str],
         author: Optional[str],
         skill_type: SkillType,
-        additional_context: Optional[str]
+        additional_context: Optional[str],
+        auto_optimize: bool,
+        target_quality: SkillQualityLevel
     ) -> SkillDefinition:
-        """Internal method to create a skill from prepared content"""
+        """Internal method to create a skill from prepared content with full lifecycle"""
         
         skill_id = self._generate_skill_id(name)
         
@@ -328,10 +809,12 @@ class SkillFactory:
             skill_type=skill_type,
             tags=tags,
             category=category,
-            author=author
+            author=author,
+            source_type=source_type,
+            source_reference=source_reference
         )
         
-        skill_content = self._generate_skill_content(
+        initial_content = self._generate_initial_content(
             source_content=source_content,
             source_type=source_type,
             source_reference=source_reference,
@@ -341,11 +824,25 @@ class SkillFactory:
             additional_context=additional_context
         )
         
+        initial_metrics = self.evaluator.evaluate(initial_content)
+        
+        final_content = initial_content
+        final_metrics = initial_metrics
+        
+        if auto_optimize and initial_metrics.quality_level.value < target_quality.value:
+            final_content = self.optimizer.optimize(
+                initial_content, 
+                initial_metrics, 
+                target_quality
+            )
+            final_metrics = self.evaluator.evaluate(final_content)
+        
         definition = SkillDefinition(metadata=metadata)
         definition.add_version(
-            content=skill_content,
+            content=final_content,
             author=author,
-            change_description=f"Initial version created from {source_type}"
+            change_description=f"Initial version created from {source_type}",
+            quality_metrics=final_metrics
         )
         
         return definition
@@ -357,7 +854,7 @@ class SkillFactory:
         short_id = str(uuid.uuid4())[:8]
         return f"{slug}-{short_id}"
     
-    def _generate_skill_content(
+    def _generate_initial_content(
         self,
         source_content: str,
         source_type: str,
@@ -367,7 +864,7 @@ class SkillFactory:
         skill_type: SkillType,
         additional_context: Optional[str]
     ) -> str:
-        """Generate structured skill content using Octopai's intelligent generation"""
+        """Generate initial skill content using intelligent generation"""
         
         prompt = self._build_skill_generation_prompt(
             source_content=source_content,
@@ -385,7 +882,7 @@ class SkillFactory:
         }
         
         data = {
-            "model": "openai/gpt-5.4",
+            "model": self.config.OCTOPAI_MODEL,
             "messages": [
                 {
                     "role": "system",
@@ -396,6 +893,14 @@ Create skills that are:
 3. Complete with examples and best practices
 4. Easy for AI Agents to understand and use
 5. Include troubleshooting guidance
+
+CRITICAL: Always include ALL of these sections:
+- Overview and Purpose
+- Prerequisites (if applicable)
+- Usage Instructions
+- Practical Examples
+- Best Practices
+- Troubleshooting Guide
 
 Format as Markdown, ready to be used as SKILL.md content."""
                 },
@@ -412,7 +917,7 @@ Format as Markdown, ready to be used as SKILL.md content."""
                 self.config.OPENROUTER_API_URL,
                 headers=headers,
                 json=data,
-                timeout=90
+                timeout=120
             )
             response.raise_for_status()
             result = response.json()
@@ -460,13 +965,12 @@ Format as Markdown, ready to be used as SKILL.md content."""
         prompt_parts.extend([
             f"",
             f"Please create a comprehensive, well-structured skill in Markdown format.",
-            f"Include:",
-            f"1. Overview and Purpose",
-            f"2. Usage Instructions",
-            f"3. Practical Examples",
-            f"4. Best Practices",
-            f"5. Troubleshooting Guide",
-            f"6. Any relevant configuration or setup information"
+            f"CRITICAL REQUIREMENTS:",
+            f"1. Start with # {name}",
+            f"2. Include ALL required sections: Overview, Usage, Examples, Best Practices, Troubleshooting",
+            f"3. Use clear section headings (##, ###)",
+            f"4. Include practical code examples where appropriate",
+            f"5. Make it easy for AI Agents to understand and use"
         ])
         
         return "\n".join(prompt_parts)
@@ -479,10 +983,12 @@ Format as Markdown, ready to be used as SKILL.md content."""
         tags: Optional[List[str]] = None,
         category: Optional[str] = None,
         author: Optional[str] = None,
-        skill_type: SkillType = SkillType.GENERAL
+        skill_type: SkillType = SkillType.GENERAL,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
-        Create a skill from raw text content
+        Create a skill from raw text content with full-lifecycle engineering
         
         Args:
             text: Raw text content to transform
@@ -492,6 +998,8 @@ Format as Markdown, ready to be used as SKILL.md content."""
             category: Optional category
             author: Optional author name
             skill_type: Type of skill being created
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -506,7 +1014,9 @@ Format as Markdown, ready to be used as SKILL.md content."""
             category=category,
             author=author,
             skill_type=skill_type,
-            additional_context=None
+            additional_context=None,
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def create_from_code(
@@ -517,10 +1027,12 @@ Format as Markdown, ready to be used as SKILL.md content."""
         description: str,
         tags: Optional[List[str]] = None,
         category: Optional[str] = None,
-        author: Optional[str] = None
+        author: Optional[str] = None,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
-        Create a skill from code
+        Create a skill from code with full-lifecycle engineering
         
         Args:
             code: Source code to transform
@@ -530,6 +1042,8 @@ Format as Markdown, ready to be used as SKILL.md content."""
             tags: Optional tags for categorization
             category: Optional category
             author: Optional author name
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -545,7 +1059,9 @@ Format as Markdown, ready to be used as SKILL.md content."""
             category=category,
             author=author,
             skill_type=SkillType.CODING,
-            additional_context=f"Programming language: {language}"
+            additional_context=f"Programming language: {language}",
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def create_from_api(
@@ -555,10 +1071,12 @@ Format as Markdown, ready to be used as SKILL.md content."""
         description: str,
         tags: Optional[List[str]] = None,
         category: Optional[str] = None,
-        author: Optional[str] = None
+        author: Optional[str] = None,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
-        Create a skill from an API endpoint
+        Create a skill from an API endpoint with full-lifecycle engineering
         
         Args:
             api_endpoint: API endpoint URL
@@ -567,6 +1085,8 @@ Format as Markdown, ready to be used as SKILL.md content."""
             tags: Optional tags for categorization
             category: Optional category
             author: Optional author name
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -582,7 +1102,9 @@ Format as Markdown, ready to be used as SKILL.md content."""
             category=category,
             author=author,
             skill_type=SkillType.AUTOMATION,
-            additional_context=f"API endpoint: {api_endpoint}"
+            additional_context=f"API endpoint: {api_endpoint}",
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def create_anything(
@@ -593,7 +1115,9 @@ Format as Markdown, ready to be used as SKILL.md content."""
         tags: Optional[List[str]] = None,
         category: Optional[str] = None,
         author: Optional[str] = None,
-        skill_type: SkillType = SkillType.GENERAL
+        skill_type: SkillType = SkillType.GENERAL,
+        auto_optimize: bool = True,
+        target_quality: SkillQualityLevel = SkillQualityLevel.GOOD
     ) -> SkillDefinition:
         """
         Create a skill from ANYTHING - the core of 'Everything Can Be a Skill'
@@ -606,6 +1130,8 @@ Format as Markdown, ready to be used as SKILL.md content."""
             category: Optional category
             author: Optional author name
             skill_type: Type of skill being created
+            auto_optimize: Whether to auto-optimize after creation
+            target_quality: Target quality level for optimization
             
         Returns:
             Complete SkillDefinition ready for use
@@ -623,7 +1149,9 @@ Format as Markdown, ready to be used as SKILL.md content."""
             category=category,
             author=author,
             skill_type=skill_type,
-            additional_context=f"Source type: {source_type}"
+            additional_context=f"Source type: {source_type}",
+            auto_optimize=auto_optimize,
+            target_quality=target_quality
         )
     
     def _normalize_anything_to_content(self, source: Any) -> str:
@@ -654,14 +1182,94 @@ Format as Markdown, ready to be used as SKILL.md content."""
 This skill was created from source content and provides structured knowledge
 for AI Agents. Created with Octopai's 'Everything Can Be a Skill' philosophy.
 
-## Source Content
-
-{source_content}
-
 ## Usage
 
 Use this skill to access and apply the knowledge contained within.
 
+## Examples
+
+### Basic Usage
+```
+# Example usage goes here
+```
+
+## Best Practices
+
+1. Review the source content thoroughly
+2. Adapt examples to your specific use case
+3. Test with sample inputs before production use
+
+## Troubleshooting
+
+### Common Issues
+
+If you encounter issues:
+1. Verify the source content is accessible
+2. Check for any format-specific requirements
+3. Refer to the original source for additional context
+
+## Source Content
+
+{source_content}
+
 ---
 
 *Created by Octopai Skill Factory - Everything Can Be a Skill!*"""
+    
+    def evaluate_skill(self, skill_def: SkillDefinition) -> SkillQualityMetrics:
+        """
+        Evaluate a skill's quality
+        
+        Args:
+            skill_def: Skill definition to evaluate
+            
+        Returns:
+            Quality metrics
+        """
+        latest = skill_def.latest_version
+        if not latest:
+            return SkillQualityMetrics()
+        return self.evaluator.evaluate(latest.content)
+    
+    def optimize_skill(
+        self,
+        skill_def: SkillDefinition,
+        target_quality: SkillQualityLevel = SkillQualityLevel.EXCELLENT,
+        author: Optional[str] = None
+    ) -> SkillDefinition:
+        """
+        Optimize an existing skill
+        
+        Args:
+            skill_def: Skill definition to optimize
+            target_quality: Target quality level
+            author: Optional author name
+            
+        Returns:
+            Updated skill definition
+        """
+        latest = skill_def.latest_version
+        if not latest:
+            return skill_def
+        
+        current_metrics = latest.quality_metrics or self.evaluator.evaluate(latest.content)
+        
+        if current_metrics.quality_level.value >= target_quality.value:
+            return skill_def
+        
+        optimized_content = self.optimizer.optimize(
+            latest.content,
+            current_metrics,
+            target_quality
+        )
+        
+        new_metrics = self.evaluator.evaluate(optimized_content)
+        
+        skill_def.add_version(
+            content=optimized_content,
+            author=author,
+            change_description=f"Optimized from {current_metrics.quality_level.value} to {new_metrics.quality_level.value}",
+            quality_metrics=new_metrics
+        )
+        
+        return skill_def
