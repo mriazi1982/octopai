@@ -1,6 +1,6 @@
 import os
 import tempfile
-from exo.core.converter import URLConverter
+from octopai.core.converter import URLConverter
 
 
 def test_converter_initialization():
