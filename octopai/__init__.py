@@ -46,7 +46,13 @@ from octopai.core.evolution_engine import (
     EvolutionObjective,
     EvolutionCandidate,
     EvolutionTrace,
-    ActionableSideInfo
+    ActionableSideInfo,
+    GoalPriority,
+    EvolutionGoal,
+    CurriculumLevel,
+    SelfVerificationResult,
+    MetaCognitiveReflection,
+    KnowledgeChunk
 )
 from octopai.core.skill_packager import (
     SkillPackager,
@@ -61,7 +67,12 @@ from octopai.core.experience_tracker import (
     InteractionRecord,
     SkillExperience,
     InteractionType,
-    InteractionOutcome
+    InteractionOutcome,
+    PatternType,
+    ExperiencePattern,
+    TransferableKnowledge,
+    MemoryConsolidation,
+    TemporalTrend
 )
 from octopai.core.pipeline import (
     OctopaiPipeline,
@@ -111,6 +122,12 @@ __all__ = [
     "EvolutionCandidate",
     "EvolutionTrace",
     "ActionableSideInfo",
+    "GoalPriority",
+    "EvolutionGoal",
+    "CurriculumLevel",
+    "SelfVerificationResult",
+    "MetaCognitiveReflection",
+    "KnowledgeChunk",
     "SkillPackager",
     "PackageConfig",
     "SkillHub",
@@ -120,6 +137,11 @@ __all__ = [
     "SkillExperience",
     "InteractionType",
     "InteractionOutcome",
+    "PatternType",
+    "ExperiencePattern",
+    "TransferableKnowledge",
+    "MemoryConsolidation",
+    "TemporalTrend",
     "OctopaiPipeline",
     "PipelineConfig",
     "PipelineResult",
