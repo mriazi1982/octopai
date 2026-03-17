@@ -1,5 +1,5 @@
 """
-Web Crawler for EXO
+Web Crawler for Octopai
 
 This module provides web crawling capabilities to fetch and save content from URLs as skill resources.
 """
@@ -11,7 +11,7 @@ import requests
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any, Optional
-from exo.utils.helpers import ensure_directory, write_file, fetch_url_content
+from octopai.utils.helpers import ensure_directory, write_file, fetch_url_content
 
 
 class WebResource:
