@@ -1,14 +1,14 @@
 import click
 import os
-from exo.core.converter import URLConverter
-from exo.core.creator import SkillCreator
-from exo.core.evolver import SkillEvolver
-from exo.utils.helpers import ensure_directory
+from octopai.core.converter import URLConverter
+from octopai.core.creator import SkillCreator
+from octopai.core.evolver import SkillEvolver
+from octopai.utils.helpers import ensure_directory
 
 
 @click.group()
 def cli():
-    """EXO - Explore, Extend, Evolve AI Agent Cognition."""
+    """Octopai - Explore, Extend, Evolve AI Agent Cognition."""
     pass
 
 
@@ -63,7 +63,7 @@ def batch(urls, output):
 @cli.command()
 def version():
     """Show version information"""
-    click.echo("EXO v0.1.0")
+    click.echo("Octopai v0.1.0")
 
 
 if __name__ == '__main__':
