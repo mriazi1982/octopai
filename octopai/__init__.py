@@ -60,7 +60,16 @@ from octopai.core.skill_packager import (
 )
 from octopai.core.skill_hub import (
     SkillHub,
-    Skill
+    Skill,
+    SkillStatus,
+    SkillVisibility,
+    SkillDependency,
+    SkillRating,
+    SkillCollection,
+    ContextSlot,
+    ContextComposition,
+    VersionDiff,
+    SearchIndex
 )
 from octopai.core.experience_tracker import (
     ExperienceTracker,
@@ -132,6 +141,15 @@ __all__ = [
     "PackageConfig",
     "SkillHub",
     "Skill",
+    "SkillStatus",
+    "SkillVisibility",
+    "SkillDependency",
+    "SkillRating",
+    "SkillCollection",
+    "ContextSlot",
+    "ContextComposition",
+    "VersionDiff",
+    "SearchIndex",
     "ExperienceTracker",
     "InteractionRecord",
     "SkillExperience",
