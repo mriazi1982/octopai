@@ -3,12 +3,14 @@ Evolution Engine - Octopai's Advanced Skill Evolution System
 
 This module provides Octopai's proprietary skill optimization and evolution system
 that continuously improves skills through intelligent reflection, iterative
-refinement, and multi-objective optimization.
+refinement, and multi-objective optimization. Features include curriculum-based
+learning, goal-oriented evolution, self-verification, and meta-cognitive reflection.
 """
 
 import os
 import json
-from typing import Optional, List, Dict, Any, Callable
+import random
+from typing import Optional, List, Dict, Any, Callable, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
@@ -28,6 +30,127 @@ class EvolutionObjective(Enum):
     ROBUSTNESS = "robustness"
     CLARITY = "clarity"
     USABILITY = "usability"
+    ADAPTABILITY = "adaptability"
+    GENERALIZATION = "generalization"
+
+
+class GoalPriority(Enum):
+    """Priority levels for evolution goals"""
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+@dataclass
+class EvolutionGoal:
+    """Specific goal for skill evolution"""
+    description: str
+    priority: GoalPriority = GoalPriority.MEDIUM
+    success_criteria: str = ""
+    progress_metrics: Dict[str, float] = field(default_factory=dict)
+    achieved: bool = False
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "description": self.description,
+            "priority": self.priority.value,
+            "success_criteria": self.success_criteria,
+            "progress_metrics": self.progress_metrics,
+            "achieved": self.achieved,
+            "created_at": self.created_at
+        }
+
+
+@dataclass
+class CurriculumLevel:
+    """A level in the evolution curriculum"""
+    level: int
+    name: str
+    difficulty: float
+    task_complexity: float
+    required_success_rate: float
+    tasks: List[Dict[str, Any]] = field(default_factory=list)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "level": self.level,
+            "name": self.name,
+            "difficulty": self.difficulty,
+            "task_complexity": self.task_complexity,
+            "required_success_rate": self.required_success_rate,
+            "tasks": self.tasks
+        }
+
+
+@dataclass
+class SelfVerificationResult:
+    """Result from self-verification process"""
+    verification_id: str
+    verified_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    passed: bool = False
+    test_results: Dict[str, bool] = field(default_factory=dict)
+    confidence_score: float = 0.0
+    issues_found: List[str] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "verification_id": self.verification_id,
+            "verified_at": self.verified_at,
+            "passed": self.passed,
+            "test_results": self.test_results,
+            "confidence_score": self.confidence_score,
+            "issues_found": self.issues_found,
+            "recommendations": self.recommendations
+        }
+
+
+@dataclass
+class MetaCognitiveReflection:
+    """Meta-cognitive reflection on the evolution process itself"""
+    reflection_id: str
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    process_insights: List[str] = field(default_factory=list)
+    strategy_adjustments: List[str] = field(default_factory=list)
+    pattern_recognitions: List[str] = field(default_factory=list)
+    learning_rate_optimization: Dict[str, float] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "reflection_id": self.reflection_id,
+            "timestamp": self.timestamp,
+            "process_insights": self.process_insights,
+            "strategy_adjustments": self.strategy_adjustments,
+            "pattern_recognitions": self.pattern_recognitions,
+            "learning_rate_optimization": self.learning_rate_optimization
+        }
+
+
+@dataclass
+class KnowledgeChunk:
+    """Atomic unit of knowledge for the knowledge base"""
+    chunk_id: str
+    content: str
+    source: str
+    relevance_score: float
+    category: str
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    access_count: int = 0
+    last_accessed: Optional[str] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "chunk_id": self.chunk_id,
+            "content": self.content,
+            "source": self.source,
+            "relevance_score": self.relevance_score,
+            "category": self.category,
+            "created_at": self.created_at,
+            "access_count": self.access_count,
+            "last_accessed": self.last_accessed
+        }
 
 
 @dataclass
@@ -220,6 +343,16 @@ class EvolutionConfig:
     reflection_depth: int = 3
     minibatch_size: int = 3
     use_system_aware_merge: bool = True
+    use_curriculum_learning: bool = True
+    use_goal_oriented_evolution: bool = True
+    use_self_verification: bool = True
+    use_meta_cognition: bool = True
+    mutation_rate: float = 0.3
+    crossover_rate: float = 0.4
+    adaptive_mutation: bool = True
+    current_curriculum_level: int = 0
+    success_threshold_for_level_up: float = 0.8
+    max_curriculum_level: int = 5
 
 
 class EvolutionEngine:
@@ -239,6 +372,10 @@ class EvolutionEngine:
     - Every Interaction Feeds Future Improvements
     - Knowledge Accumulates Across Generations
     - AI Agent Cognition Elevates Over Time
+    - Curriculum-Based Learning Progression
+    - Goal-Oriented Evolution
+    - Self-Verification and Validation
+    - Meta-Cognitive Process Optimization
     """
 
     def __init__(self, config: Optional[EvolutionConfig] = None, experience_tracker=None):
@@ -247,10 +384,376 @@ class EvolutionEngine:
         self.candidate_frontier: List[EvolutionCandidate] = []
         self.evolution_history: List[Dict[str, Any]] = []
         self.knowledge_base: Dict[str, Any] = {}
+        self.knowledge_chunks: List[KnowledgeChunk] = []
         self.lessons_learned: List[str] = []
         self.reflection_archive: List[Dict[str, Any]] = []
         self.evaluator: Optional[Callable[[str, Any], tuple[float, ActionableSideInfo]]] = None
         self.experience_tracker = experience_tracker
+        self.evolution_goals: List[EvolutionGoal] = []
+        self.curriculum_levels: List[CurriculumLevel] = self._initialize_curriculum()
+        self.meta_cognitive_reflections: List[MetaCognitiveReflection] = []
+        self.self_verification_results: List[SelfVerificationResult] = []
+        self.performance_trajectory: List[Dict[str, float]] = []
+        self.strategy_adaptation_count: int = 0
+    
+    def _initialize_curriculum(self) -> List[CurriculumLevel]:
+        """Initialize a progressive learning curriculum"""
+        return [
+            CurriculumLevel(
+                level=0,
+                name="Foundational",
+                difficulty=0.2,
+                task_complexity=0.2,
+                required_success_rate=0.6,
+                tasks=[{"type": "basic_validation", "complexity": "low"}]
+            ),
+            CurriculumLevel(
+                level=1,
+                name="Structural",
+                difficulty=0.4,
+                task_complexity=0.4,
+                required_success_rate=0.7,
+                tasks=[{"type": "structure_validation", "complexity": "medium"}]
+            ),
+            CurriculumLevel(
+                level=2,
+                name="Completeness",
+                difficulty=0.6,
+                task_complexity=0.6,
+                required_success_rate=0.75,
+                tasks=[{"type": "completeness_validation", "complexity": "medium"}]
+            ),
+            CurriculumLevel(
+                level=3,
+                name="Optimization",
+                difficulty=0.75,
+                task_complexity=0.75,
+                required_success_rate=0.8,
+                tasks=[{"type": "optimization_validation", "complexity": "high"}]
+            ),
+            CurriculumLevel(
+                level=4,
+                name="Advanced",
+                difficulty=0.9,
+                task_complexity=0.85,
+                required_success_rate=0.85,
+                tasks=[{"type": "advanced_validation", "complexity": "very_high"}]
+            )
+        ]
+    
+    def add_evolution_goal(self, description: str, priority: GoalPriority = GoalPriority.MEDIUM, 
+                           success_criteria: str = "") -> EvolutionGoal:
+        """Add a specific goal for the evolution process"""
+        import uuid
+        goal = EvolutionGoal(
+            description=description,
+            priority=priority,
+            success_criteria=success_criteria
+        )
+        self.evolution_goals.append(goal)
+        return goal
+    
+    def _check_goal_progress(self, candidate: EvolutionCandidate) -> None:
+        """Check progress toward evolution goals"""
+        for goal in self.evolution_goals:
+            if goal.achieved:
+                continue
+            for obj, score in candidate.fitness_scores.items():
+                if obj.value in goal.success_criteria.lower():
+                    goal.progress_metrics[obj.value] = score
+            if all(score >= 0.8 for score in goal.progress_metrics.values()):
+                goal.achieved = True
+    
+    def _update_curriculum_level(self, success_rate: float) -> None:
+        """Update curriculum level based on performance"""
+        if not self.config.use_curriculum_learning:
+            return
+        
+        current_level = self.curriculum_levels[self.config.current_curriculum_level]
+        
+        if success_rate >= current_level.required_success_rate:
+            if self.config.current_curriculum_level < self.config.max_curriculum_level:
+                self.config.current_curriculum_level += 1
+                print(f"  Advanced to curriculum level {self.config.current_curriculum_level}: {self.curriculum_levels[self.config.current_curriculum_level].name}")
+        elif success_rate < current_level.required_success_rate * 0.7:
+            if self.config.current_curriculum_level > 0:
+                self.config.current_curriculum_level -= 1
+                print(f"  Regressed to curriculum level {self.config.current_curriculum_level}: {self.curriculum_levels[self.config.current_curriculum_level].name}")
+    
+    def _self_verify(self, candidate: EvolutionCandidate) -> SelfVerificationResult:
+        """Perform self-verification of a candidate"""
+        import uuid
+        verification_id = str(uuid.uuid4())
+        result = SelfVerificationResult(verification_id=verification_id)
+        
+        if not self.config.use_self_verification:
+            result.passed = True
+            result.confidence_score = 0.5
+            return result
+        
+        try:
+            content = candidate.content
+            
+            result.test_results["has_structure"] = "##" in content
+            result.test_results["has_examples"] = "example" in content.lower() or "Example" in content
+            result.test_results["has_troubleshooting"] = "troubleshoot" in content.lower() or "Troubleshoot" in content
+            result.test_results["has_best_practices"] = "best practice" in content.lower() or "Best Practice" in content
+            result.test_results["has_code_blocks"] = content.count('```') >= 2
+            
+            passed_tests = sum(1 for passed in result.test_results.values() if passed)
+            result.confidence_score = passed_tests / len(result.test_results)
+            result.passed = result.confidence_score >= 0.6
+            
+            if not result.passed:
+                for test_name, passed in result.test_results.items():
+                    if not passed:
+                        result.issues_found.append(f"Failed test: {test_name}")
+                        result.recommendations.append(f"Improve: {test_name.replace('_', ' ')}")
+            
+        except Exception as e:
+            result.issues_found.append(f"Verification error: {str(e)}")
+            result.confidence_score = 0.0
+            result.passed = False
+        
+        self.self_verification_results.append(result)
+        return result
+    
+    def _meta_cognitive_reflect(self, iteration: int, traces: List[EvolutionTrace]) -> MetaCognitiveReflection:
+        """Perform meta-cognitive reflection on the evolution process"""
+        import uuid
+        reflection = MetaCognitiveReflection(reflection_id=str(uuid.uuid4()))
+        
+        if not self.config.use_meta_cognition:
+            return reflection
+        
+        if len(self.performance_trajectory) >= 3:
+            recent_performance = self.performance_trajectory[-3:]
+            avg_fitness = sum(p.get('avg_fitness', 0) for p in recent_performance) / len(recent_performance)
+            fitness_trend = recent_performance[-1].get('avg_fitness', 0) - recent_performance[0].get('avg_fitness', 0)
+            
+            if fitness_trend < -0.1:
+                reflection.process_insights.append("Performance is declining - consider strategy adjustment")
+                reflection.strategy_adjustments.append("Increase mutation rate for exploration")
+                reflection.learning_rate_optimization['mutation_rate'] = min(0.6, self.config.mutation_rate + 0.1)
+            elif fitness_trend > 0.1:
+                reflection.process_insights.append("Performance is improving - current strategy effective")
+                reflection.learning_rate_optimization['mutation_rate'] = max(0.1, self.config.mutation_rate - 0.05)
+            else:
+                reflection.process_insights.append("Performance stable - maintaining current strategy")
+            
+            if avg_fitness > 0.8:
+                reflection.pattern_recognitions.append("High fitness achieved - focusing on refinement")
+            elif avg_fitness < 0.5:
+                reflection.pattern_recognitions.append("Low fitness - exploring new approaches")
+        
+        if iteration % self.config.reflection_depth == 0 and iteration > 0:
+            reflection.process_insights.append("Regular meta-cognitive check point")
+        
+        self.meta_cognitive_reflections.append(reflection)
+        
+        if reflection.learning_rate_optimization and self.config.adaptive_mutation:
+            if 'mutation_rate' in reflection.learning_rate_optimization:
+                self.config.mutation_rate = reflection.learning_rate_optimization['mutation_rate']
+                self.strategy_adaptation_count += 1
+        
+        return reflection
+    
+    def _adaptive_mutation(self, candidate: EvolutionCandidate, diagnosis: str) -> EvolutionCandidate:
+        """Apply adaptive mutation based on current state"""
+        mutation_strategy = "reflective"
+        
+        if self.config.adaptive_mutation:
+            if len(self.performance_trajectory) >= 2:
+                last_fitness = self.performance_trajectory[-1].get('avg_fitness', 0) if self.performance_trajectory else 0
+                prev_fitness = self.performance_trajectory[-2].get('avg_fitness', 0) if len(self.performance_trajectory) >= 2 else 0
+                
+                if last_fitness - prev_fitness < -0.05:
+                    mutation_strategy = "exploratory"
+                elif last_fitness > 0.85:
+                    mutation_strategy = "refinement"
+        
+        return self._mutate_by_strategy(candidate, diagnosis, mutation_strategy)
+    
+    def _mutate_by_strategy(self, candidate: EvolutionCandidate, diagnosis: str, strategy: str) -> EvolutionCandidate:
+        """Apply mutation based on specified strategy"""
+        if strategy == "exploratory":
+            return self._exploratory_mutation(candidate, diagnosis)
+        elif strategy == "refinement":
+            return self._refinement_mutation(candidate, diagnosis)
+        else:
+            return self._reflective_mutation(candidate, diagnosis)
+    
+    def _exploratory_mutation(self, candidate: EvolutionCandidate, diagnosis: str) -> EvolutionCandidate:
+        """Exploratory mutation for discovering new approaches"""
+        lessons_text = "\n".join([f"- {lesson}" for lesson in self.lessons_learned[-10:]])
+        
+        headers = {
+            'Authorization': f'Bearer {self.api_config.OPENROUTER_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            "model": self.config.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": """You are an expert at creative skill evolution and exploration.
+Create a significantly different version that explores new approaches and structures.
+Be bold and creative while maintaining quality.
+Focus on:
+1. Exploring alternative structures
+2. Trying new organization patterns
+3. Experimenting with different content styles
+4. Adding innovative sections and elements"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""Current skill (v{candidate.version}):
+{candidate.content}
+
+Diagnosis:
+{diagnosis}
+
+Lessons Learned:
+{lessons_text}
+
+Please create an exploratory, innovative version (v{candidate.version + 1}) that explores new approaches."""
+                }
+            ],
+            "temperature": 0.9
+        }
+        
+        try:
+            response = requests.post(
+                self.api_config.OPENROUTER_API_URL,
+                headers=headers,
+                json=data,
+                timeout=90
+            )
+            response.raise_for_status()
+            result = response.json()
+            improved_content = result.get('choices', [{}])[0].get('message', {}).get('content', candidate.content)
+            
+            new_knowledge = candidate.knowledge_base.copy()
+            new_knowledge[f'v{candidate.version}_exploratory'] = {'strategy': 'exploratory', 'timestamp': datetime.now().isoformat()}
+            
+            return EvolutionCandidate(
+                content=improved_content,
+                version=candidate.version + 1,
+                ancestors=candidate.ancestors + [f"v{candidate.version}_exploratory"],
+                knowledge_base=new_knowledge
+            )
+            
+        except Exception as e:
+            print(f"Exploratory mutation failed: {e}")
+            return candidate
+    
+    def _refinement_mutation(self, candidate: EvolutionCandidate, diagnosis: str) -> EvolutionCandidate:
+        """Refinement mutation for polishing high-quality candidates"""
+        lessons_text = "\n".join([f"- {lesson}" for lesson in self.lessons_learned[-20:]])
+        
+        headers = {
+            'Authorization': f'Bearer {self.api_config.OPENROUTER_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            "model": self.config.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": """You are an expert at skill refinement and polish.
+Take a high-quality skill and make it exceptional through careful refinement.
+Focus on:
+1. Perfecting existing content
+2. Enhancing clarity and precision
+3. Adding fine details and nuance
+4. Ensuring consistency and flow
+5. Polishing examples and explanations"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""Current skill (v{candidate.version}):
+{candidate.content}
+
+Diagnosis:
+{diagnosis}
+
+Lessons Learned:
+{lessons_text}
+
+Please create a refined, polished version (v{candidate.version + 1}) that perfects the existing content."""
+                }
+            ],
+            "temperature": 0.4
+        }
+        
+        try:
+            response = requests.post(
+                self.api_config.OPENROUTER_API_URL,
+                headers=headers,
+                json=data,
+                timeout=90
+            )
+            response.raise_for_status()
+            result = response.json()
+            improved_content = result.get('choices', [{}])[0].get('message', {}).get('content', candidate.content)
+            
+            new_knowledge = candidate.knowledge_base.copy()
+            new_knowledge[f'v{candidate.version}_refinement'] = {'strategy': 'refinement', 'timestamp': datetime.now().isoformat()}
+            
+            return EvolutionCandidate(
+                content=improved_content,
+                version=candidate.version + 1,
+                ancestors=candidate.ancestors + [f"v{candidate.version}_refinement"],
+                knowledge_base=new_knowledge
+            )
+            
+        except Exception as e:
+            print(f"Refinement mutation failed: {e}")
+            return candidate
+    
+    def _add_knowledge_chunk(self, content: str, source: str, category: str, relevance_score: float = 0.5) -> str:
+        """Add a chunk of knowledge to the knowledge base"""
+        import uuid
+        chunk_id = str(uuid.uuid4())
+        chunk = KnowledgeChunk(
+            chunk_id=chunk_id,
+            content=content,
+            source=source,
+            relevance_score=relevance_score,
+            category=category
+        )
+        self.knowledge_chunks.append(chunk)
+        
+        if len(self.knowledge_chunks) > 500:
+            self.knowledge_chunks.sort(key=lambda c: c.relevance_score, reverse=True)
+            self.knowledge_chunks = self.knowledge_chunks[:500]
+        
+        return chunk_id
+    
+    def _retrieve_relevant_knowledge(self, query: str, limit: int = 5) -> List[KnowledgeChunk]:
+        """Retrieve relevant knowledge chunks based on query"""
+        query_lower = query.lower()
+        
+        scored_chunks = []
+        for chunk in self.knowledge_chunks:
+            score = 0.0
+            if query_lower in chunk.content.lower():
+                score += 0.5
+            score += chunk.relevance_score * 0.3
+            if chunk.last_accessed:
+                days_since = (datetime.now() - datetime.fromisoformat(chunk.last_accessed)).days
+                score += max(0, 0.2 - (days_since * 0.01))
+            scored_chunks.append((score, chunk))
+        
+        scored_chunks.sort(key=lambda x: x[0], reverse=True)
+        
+        for _, chunk in scored_chunks[:limit]:
+            chunk.access_count += 1
+            chunk.last_accessed = datetime.now().isoformat()
+        
+        return [chunk for _, chunk in scored_chunks[:limit]]
     
     def evolve_skill(
         self,
@@ -296,6 +799,9 @@ class EvolutionEngine:
         
         print(f"Starting evolution with {self.config.max_iterations} iterations...")
         
+        if self.config.use_curriculum_learning:
+            print(f"  Initial curriculum level: {self.config.current_curriculum_level} - {self.curriculum_levels[self.config.current_curriculum_level].name}")
+        
         for iteration in range(self.config.max_iterations):
             print(f"\nIteration {iteration + 1}/{self.config.max_iterations}")
             
@@ -304,8 +810,17 @@ class EvolutionEngine:
             if self.config.use_intelligent_reflection:
                 self._reflect_on_traces(traces, iteration)
             
+            if self.config.use_meta_cognition:
+                meta_reflection = self._meta_cognitive_reflect(iteration, traces)
+                if meta_reflection.process_insights:
+                    print(f"  Meta-cognitive insights: {len(meta_reflection.process_insights)}")
+            
             diagnosis = self._synthesize_diagnosis(traces)
             self._extract_knowledge(diagnosis)
+            
+            if self.config.use_goal_oriented_evolution:
+                for candidate in self.candidate_frontier:
+                    self._check_goal_progress(candidate)
             
             new_candidates = self._mutate_candidates(diagnosis)
             
@@ -313,8 +828,32 @@ class EvolutionEngine:
                 merged = self._system_aware_merge(new_candidates)
                 new_candidates.extend(merged)
             
+            if self.config.use_self_verification:
+                verified_candidates = []
+                for candidate in new_candidates:
+                    verification = self._self_verify(candidate)
+                    if verification.passed or verification.confidence_score >= 0.5:
+                        verified_candidates.append(candidate)
+                if verified_candidates:
+                    new_candidates = verified_candidates
+                    print(f"  Self-verification: {len(verified_candidates)}/{len(new_candidates) + len(verified_candidates) - len(verified_candidates)} candidates passed")
+            
             self._update_pareto_frontier(new_candidates)
+            
+            if self.config.use_curriculum_learning and self.candidate_frontier:
+                avg_fitness = sum(c.overall_fitness for c in self.candidate_frontier) / len(self.candidate_frontier)
+                self._update_curriculum_level(avg_fitness)
+            
             self._record_iteration(iteration, traces, diagnosis, new_candidates)
+            
+            if self.candidate_frontier:
+                avg_fitness = sum(c.overall_fitness for c in self.candidate_frontier) / len(self.candidate_frontier)
+                self.performance_trajectory.append({
+                    'iteration': iteration + 1,
+                    'avg_fitness': avg_fitness,
+                    'best_fitness': max(c.overall_fitness for c in self.candidate_frontier),
+                    'curriculum_level': self.config.current_curriculum_level
+                })
         
         best_candidate = self._select_best_candidate()
         write_file(skill_file, best_candidate.content)
@@ -440,7 +979,10 @@ class EvolutionEngine:
         new_candidates = []
         
         for candidate in self.candidate_frontier:
-            improved = self._reflective_mutation(candidate, diagnosis)
+            if self.config.adaptive_mutation:
+                improved = self._adaptive_mutation(candidate, diagnosis)
+            else:
+                improved = self._reflective_mutation(candidate, diagnosis)
             new_candidates.append(improved)
         
         return new_candidates
@@ -878,8 +1420,15 @@ Please provide comprehensive diagnosis and prioritized recommendations."""
             "best_candidate": best_candidate.to_dict(),
             "frontier": [c.to_dict() for c in self.candidate_frontier],
             "knowledge_base": self.knowledge_base,
+            "knowledge_chunks": [chunk.to_dict() for chunk in self.knowledge_chunks[-50:]],
             "lessons_learned": self.lessons_learned,
             "reflection_archive": self.reflection_archive[-50:],
+            "meta_cognitive_reflections": [ref.to_dict() for ref in self.meta_cognitive_reflections[-20:]],
+            "self_verification_results": [res.to_dict() for res in self.self_verification_results[-20:]],
+            "evolution_goals": [goal.to_dict() for goal in self.evolution_goals],
+            "curriculum_level": self.config.current_curriculum_level,
+            "performance_trajectory": self.performance_trajectory,
+            "strategy_adaptations": self.strategy_adaptation_count,
             "history": self.evolution_history,
             "config_used": {
                 "use_intelligent_reflection": self.config.use_intelligent_reflection,
@@ -887,6 +1436,11 @@ Please provide comprehensive diagnosis and prioritized recommendations."""
                 "use_candidate_merge": self.config.use_candidate_merge,
                 "use_multi_objective": self.config.use_multi_objective,
                 "use_system_aware_merge": self.config.use_system_aware_merge,
+                "use_curriculum_learning": self.config.use_curriculum_learning,
+                "use_goal_oriented_evolution": self.config.use_goal_oriented_evolution,
+                "use_self_verification": self.config.use_self_verification,
+                "use_meta_cognition": self.config.use_meta_cognition,
+                "adaptive_mutation": self.config.adaptive_mutation,
                 "frontier_size": self.config.frontier_size
             }
         }
@@ -905,11 +1459,31 @@ Please provide comprehensive diagnosis and prioritized recommendations."""
 - **Intelligent Reflection**: {'Enabled' if self.config.use_intelligent_reflection else 'Disabled'}
 - **Knowledge Integration**: {'Enabled' if self.config.use_knowledge_integration else 'Disabled'}
 - **System-Aware Merge**: {'Enabled' if self.config.use_system_aware_merge else 'Disabled'}
+- **Curriculum Learning**: {'Enabled' if self.config.use_curriculum_learning else 'Disabled'}
+- **Goal-Oriented Evolution**: {'Enabled' if self.config.use_goal_oriented_evolution else 'Disabled'}
+- **Self-Verification**: {'Enabled' if self.config.use_self_verification else 'Disabled'}
+- **Meta-Cognition**: {'Enabled' if self.config.use_meta_cognition else 'Disabled'}
+- **Adaptive Mutation**: {'Enabled' if self.config.adaptive_mutation else 'Disabled'}
+- **Final Curriculum Level**: {self.config.current_curriculum_level}
+- **Strategy Adaptations**: {self.strategy_adaptation_count}
 
 ## Key Lessons
 """
         for i, lesson in enumerate(self.lessons_learned[-15:], 1):
             summary += f"{i}. {lesson}\n"
+        
+        if self.evolution_goals:
+            summary += f"\n## Evolution Goals\n"
+            achieved = sum(1 for g in self.evolution_goals if g.achieved)
+            summary += f"- **Goals Achieved**: {achieved}/{len(self.evolution_goals)}\n"
+            for goal in self.evolution_goals:
+                status = "✓ Achieved" if goal.achieved else "○ In Progress"
+                summary += f"- {status}: {goal.description}\n"
+        
+        if self.performance_trajectory:
+            summary += f"\n## Performance Trajectory\n"
+            for point in self.performance_trajectory:
+                summary += f"- Iteration {point['iteration']}: Avg={point['avg_fitness']:.2f}, Best={point['best_fitness']:.2f}\n"
         
         summary += f"\n## Final Fitness Scores\n"
         for obj, score in best_candidate.fitness_scores.items():
