@@ -45,6 +45,40 @@ from octopai.core.experience_tracker import (
     SkillExperience
 )
 from octopai.core.pipeline import OctopaiPipeline
+from octopai.core.skill_bank import (
+    SkillBank,
+    BankedSkill,
+    SkillPrinciple,
+    CommonMistake,
+    SkillType as BankSkillType
+)
+from octopai.core.experience_distiller import (
+    ExperienceDistiller,
+    Trajectory,
+    TrajectoryStep,
+    TrajectoryType,
+    ExtractedPattern,
+    FailureLesson
+)
+from octopai.core.recursive_evolution import (
+    RecursiveEvolutionEngine,
+    EvolutionCycle,
+    EvolutionTrigger,
+    EvolutionStatus,
+    EvolutionConfig as RecursiveEvolutionConfig,
+    EvolutionProposal,
+    ValidationResult
+)
+from octopai.core.skill_registry import (
+    SkillRegistry,
+    RegistrySkillMetadata,
+    SkillRegistryStatus,
+    RedirectType,
+    SkillComment,
+    SkillStar,
+    SkillRedirect,
+    SkillInstallRecord
+)
 
 __all__ = [
     "URLConverter",
@@ -71,5 +105,31 @@ __all__ = [
     "ExperienceTracker",
     "InteractionRecord",
     "SkillExperience",
-    "OctopaiPipeline"
+    "OctopaiPipeline",
+    "SkillBank",
+    "BankedSkill",
+    "SkillPrinciple",
+    "CommonMistake",
+    "BankSkillType",
+    "ExperienceDistiller",
+    "Trajectory",
+    "TrajectoryStep",
+    "TrajectoryType",
+    "ExtractedPattern",
+    "FailureLesson",
+    "RecursiveEvolutionEngine",
+    "EvolutionCycle",
+    "EvolutionTrigger",
+    "EvolutionStatus",
+    "RecursiveEvolutionConfig",
+    "EvolutionProposal",
+    "ValidationResult",
+    "SkillRegistry",
+    "RegistrySkillMetadata",
+    "SkillRegistryStatus",
+    "RedirectType",
+    "SkillComment",
+    "SkillStar",
+    "SkillRedirect",
+    "SkillInstallRecord"
 ]
