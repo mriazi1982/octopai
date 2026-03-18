@@ -89,6 +89,30 @@ from octopai.core.pipeline import (
     PipelineResult,
     PipelineStage
 )
+from octopai.core.skill_bank import (
+    SkillBank,
+    BankedSkill,
+    SkillPrinciple,
+    CommonMistake,
+    SkillType as BankSkillType
+)
+from octopai.core.experience_distiller import (
+    ExperienceDistiller,
+    Trajectory,
+    TrajectoryStep,
+    TrajectoryType,
+    ExtractedPattern,
+    FailureLesson
+)
+from octopai.core.recursive_evolution import (
+    RecursiveEvolutionEngine,
+    EvolutionCycle,
+    EvolutionTrigger,
+    EvolutionStatus,
+    EvolutionConfig,
+    EvolutionProposal,
+    ValidationResult
+)
 from octopai.api import (
     Octopai,
     create_from_url,
