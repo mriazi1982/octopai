@@ -337,7 +337,11 @@ octopai/
 │   ├── resource_parser.py # Multi-format file parser (PDF, DOC, Excel, etc.)
 │   ├── skill_hub.py     # SkillHub - comprehensive skill management center
 │   ├── skill_packager.py # Skill packaging and distribution
-│   └── pipeline.py      # End-to-end skill engineering pipeline
+│   ├── pipeline.py      # End-to-end skill engineering pipeline
+│   ├── skill_bank.py    # Hierarchical skill library system
+│   ├── experience_distiller.py # Experience-based skill extraction system
+│   ├── recursive_evolution.py # Dynamic skill evolution engine
+│   └── skill_registry.py # Advanced skill registry system
 ├── api_integration/      # API integration layer
 │   ├── __init__.py
 │   ├── api.py           # Integration API with async task management
@@ -345,6 +349,7 @@ octopai/
 ├── cli/                  # Command-line interface
 │   └── main.py           # Main command entry point
 ├── utils/                # Utility functions
+│   ├── __init__.py       # Utility module exports
 │   ├── config.py         # Configuration management
 │   └── helpers.py        # Helper functions
 ├── web/                  # Web application
@@ -360,13 +365,17 @@ octopai/
 │       └── package.json
 ├── tests/                # Comprehensive test suite
 │   ├── test_converter.py
+│   ├── test_creator.py   # Skill creator tests
 │   ├── test_evolution_engine.py
+│   ├── test_evolver.py   # Skill evolver tests
 │   ├── test_resource_parser.py
 │   └── test_skill_hub.py
 ├── docs/                 # Documentation (English & Chinese)
 │   ├── en/               # English documentation
 │   └── zh/               # Chinese documentation
 └── examples/             # Usage examples
+    ├── advanced_skill_evolution.py
+    └── skill_registry_demo.py
 ```
 
 
