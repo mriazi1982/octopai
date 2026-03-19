@@ -509,9 +509,26 @@ Focus on:
             )
             response.raise_for_status()
             result = response.json()
-            return result.get('choices', [{}])[0].get('message', {}).get('content', content)
+            # Improved response parsing with better error handling
+            choices = result.get('choices', [])
+            if not choices:
+                raise ValueError("No choices returned from API")
+            message = choices[0].get('message', {})
+            optimized_content = message.get('content', content)
+            if not optimized_content:
+                raise ValueError("No content returned from API")
+            return optimized_content
+        except requests.exceptions.Timeout:
+            print("API request timed out. Using fallback optimization.")
+            return self._build_fallback_optimization(content, metrics)
+        except requests.exceptions.RequestException as e:
+            print(f"API request failed: {str(e)}. Using fallback optimization.")
+            return self._build_fallback_optimization(content, metrics)
+        except (ValueError, KeyError) as e:
+            print(f"API response parsing failed: {str(e)}. Using fallback optimization.")
+            return self._build_fallback_optimization(content, metrics)
         except Exception as e:
-            print(f"Optimization fallback: {e}")
+            print(f"Unexpected error during optimization: {str(e)}. Using fallback optimization.")
             return self._build_fallback_optimization(content, metrics)
     
     def _build_optimization_prompt(self, content: str, metrics: SkillQualityMetrics) -> str:
