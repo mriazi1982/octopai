@@ -158,13 +158,184 @@ Full-stack web application with comprehensive REST API:
 - **Async Task Management**: Background task processing with status tracking
 - **Integration Ready**: Designed for easy integration with other systems
 
+### 🔄 Workflow Engine - Advanced Skill Orchestration
+Powerful workflow engine for orchestrating complex skill sequences:
+- **Multi-Format Workflows**: YAML, JSON, and Markdown workflow definitions
+- **Progressive Loading**: Skills loaded only when needed for optimal context usage
+- **Conditional Execution**: Smart condition-based step execution
+- **Retry & Timeout**: Built-in retry mechanisms and timeout handling
+- **Python & Skill Actions**: Execute Python functions and existing skills seamlessly
+- **API Integration**: Direct API calls as workflow steps
+
+```python
+from octopai import WorkflowEngine, WorkflowDefinition, WorkflowStep
+
+# Initialize workflow engine
+engine = WorkflowEngine()
+
+# Create a workflow programmatically
+workflow = WorkflowDefinition(
+    name="Research Report Generator",
+    version="1.0.0",
+    description="Generates comprehensive research reports",
+    author="Octopai Team",
+    tags=["research", "reporting", "automation"],
+    variables={"topic": "AI Agents", "output_format": "markdown"}
+)
+
+# Add workflow steps
+workflow.steps.append(WorkflowStep(
+    name="web_research",
+    description="Research the topic online",
+    action="skill:web_research",
+    inputs={"query": "${topic}"},
+    outputs=["research_data"]
+))
+
+workflow.steps.append(WorkflowStep(
+    name="generate_report",
+    description="Generate the final report",
+    action="skill:report_generation",
+    inputs={"data": "${research_data}", "format": "${output_format}"},
+    outputs=["final_report"]
+))
+
+# Execute the workflow
+results = await engine.execute_workflow(workflow)
+print(results["final_report"])
+```
+
+### 🧠 Subtask Orchestrator - Intelligent Task Decomposition
+Advanced system for decomposing and executing complex tasks:
+- **Automatic Task Decomposition**: AI-powered task breakdown into parallelizable subtasks
+- **Dependency Management**: Smart dependency resolution and execution ordering
+- **Priority-Based Execution**: Dynamic prioritization of critical subtasks
+- **Parallel Execution**: Concurrent execution of independent subtasks
+- **Progress Tracking**: Real-time status monitoring and completion callbacks
+- **Error Recovery**: Automatic retry and recovery from subtask failures
+
+```python
+from octopai import SubtaskOrchestrator
+
+# Initialize orchestrator
+orchestrator = SubtaskOrchestrator()
+
+# Decompose a complex task
+task_group = await orchestrator.decompose_task(
+    main_task="Create a comprehensive website about AI Agents",
+    context={"target_audience": "developers", "style": "modern"}
+)
+
+# Execute the decomposed tasks
+result = await orchestrator.execute_subtask_group(task_group.id)
+
+print(f"Completed {result['completed_count']} of {result['total_count']} tasks")
+print("Results:", result["results"])
+```
+
+### 💾 Persistent Memory - User Preference Learning
+Sophisticated memory system for personalized interactions:
+- **Fact Memory**: Store and retrieve factual knowledge with confidence scoring
+- **User Preferences**: Learn and adapt to user preferences over time
+- **Conversation History**: Maintain structured summaries of past interactions
+- **Writing Style**: Capture and apply user's writing style
+- **Technical Stack**: Track user's technology preferences
+- **Automatic Extraction**: AI-powered memory extraction from conversations
+- **Contextual Retrieval**: Smart context injection based on current task
+
+```python
+from octopai import PersistentMemory
+
+# Initialize memory system
+memory = PersistentMemory()
+
+# Store a fact
+memory.add_fact(
+    user_id="user_123",
+    content="Prefers Python over JavaScript for data analysis",
+    category="preference",
+    source="conversation",
+    confidence=0.9,
+    tags=["programming", "data-analysis"]
+)
+
+# Set a user preference
+memory.set_preference(
+    user_id="user_123",
+    key="output_format",
+    value="markdown",
+    category="formatting",
+    description="Preferred output format for documents",
+    strength=0.8
+)
+
+# Get memory context for a task
+context = memory.get_memory_context(
+    user_id="user_123",
+    current_task="Generate a data analysis report"
+)
+
+print("User facts:", context["facts"])
+print("User preferences:", context["preferences"])
+```
+
+### 🛡️ Sandbox Executor - Isolated Execution Environment
+Secure, isolated execution environment for code and commands:
+- **Session Management**: Create and manage isolated sandbox sessions
+- **File System**: Complete virtual file system with uploads, workspace, and outputs
+- **Command Execution**: Secure command execution with timeout and security policies
+- **Python Execution**: Run Python code in isolated environments
+- **Notebook Support**: Jupyter notebook cell execution
+- **Security Policies**: Configurable allowed/blocked command lists
+- **Execution History**: Complete audit trail of all operations
+
+```python
+from octopai import SandboxExecutor, SandboxConfig
+
+# Initialize sandbox executor
+executor = SandboxExecutor()
+
+# Create a sandbox session with custom config
+config = SandboxConfig(
+    timeout=300,
+    max_memory_mb=1024,
+    enable_network=False
+)
+session = executor.create_session(config=config)
+
+# Write a file
+executor.write_file(
+    session_id=session.id,
+    file_path="workspace/analysis.py",
+    content="""
+import pandas as pd
+data = pd.DataFrame({'x': [1, 2, 3], 'y': [4, 5, 6]})
+print(data.describe())
+"""
+)
+
+# Execute Python code
+result = await executor.execute_python_code(
+    session_id=session.id,
+    code="import pandas as pd; print(pd.__version__)"
+)
+
+print("Success:", result.success)
+print("Output:", result.stdout)
+
+# Get session summary
+summary = executor.get_session_summary(session.id)
+print("Session stats:", summary)
+```
+
 ### 🔧 High-Level API
 Simplified access to all functionality:
 ```python
 from octopai import (
     Octopai, convert, create_from_url, create_from_files,
     create_from_prompt, optimize_skill, parse,
-    hub_create_collection, hub_semantic_search, hub_publish
+    hub_create_collection, hub_semantic_search, hub_publish,
+    WorkflowEngine, SubtaskOrchestrator, PersistentMemory, SandboxExecutor
 )
 
 # Convert URL to skill content
@@ -341,7 +512,11 @@ octopai/
 │   ├── skill_bank.py    # Hierarchical skill library system
 │   ├── experience_distiller.py # Experience-based skill extraction system
 │   ├── recursive_evolution.py # Dynamic skill evolution engine
-│   └── skill_registry.py # Advanced skill registry system
+│   ├── skill_registry.py # Advanced skill registry system
+│   ├── workflow_engine.py # 🆕 Advanced workflow orchestration engine
+│   ├── subtask_orchestrator.py # 🆕 Intelligent task decomposition & parallel execution
+│   ├── persistent_memory.py # 🆕 User preference learning & persistent memory
+│   └── sandbox_executor.py # 🆕 Isolated execution environment
 ├── api_integration/      # API integration layer
 │   ├── __init__.py
 │   ├── api.py           # Integration API with async task management
@@ -377,6 +552,32 @@ octopai/
     ├── advanced_skill_evolution.py
     └── skill_registry_demo.py
 ```
+
+## 🚀 Super Agent Capabilities
+
+Octopai now features a comprehensive super agent architecture with:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      Octopai Super Agent                        │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐ │
+│  │  Workflow Engine │  │Subtask Orchestrator│  │   Memory     │ │
+│  │  & Skill Chains  │  │  & Parallel Exec  │  │   System     │ │
+│  └──────────────────┘  └──────────────────┘  └──────────────┘ │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐ │
+│  │ Sandbox Executor │  │    SkillHub      │  │   Evolution  │ │
+│  │  & Code Runtime  │  │   & Skill Bank   │  │   Engine     │ │
+│  └──────────────────┘  └──────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Super Agent Features:**
+- **Unified Orchestration**: Coordinate skills, workflows, and subtasks seamlessly
+- **Adaptive Learning**: Continuous improvement through memory and experience
+- **Secure Execution**: Isolated sandbox environments for all code execution
+- **Personalization**: User-specific preferences and contextual adaptation
+- **Scalability**: Parallel execution and intelligent resource management
 
 
 ## 💡 Skill Evolution System
