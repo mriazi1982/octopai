@@ -821,17 +821,21 @@ class SkillHub:
         """Delete a skill"""
         if skill_id not in self._skills:
             return False
-        
+
         skill_file = self.skills_dir / f"{skill_id}.json"
         if skill_file.exists():
             skill_file.unlink()
-        
+
         del self._skills[skill_id]
-        
-        index = {s.metadata.skill_id: f"skills/{s.metadata.skill_id}.json" 
+
+        if skill_id in self._search_index:
+            del self._search_index[skill_id]
+            self._save_search_index()
+
+        index = {s.metadata.skill_id: f"skills/{s.metadata.skill_id}.json"
                  for s in self._skills.values()}
         self._save_index(index)
-        
+
         return True
     
     def search_skills(
