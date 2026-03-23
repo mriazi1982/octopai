@@ -123,6 +123,33 @@ from octopai.core.skill_registry import (
     SkillRedirect,
     SkillInstallRecord
 )
+from octopai.core.workflow_engine import (
+    WorkflowEngine,
+    WorkflowDefinition,
+    WorkflowStep,
+    WorkflowStepStatus
+)
+from octopai.core.subtask_orchestrator import (
+    SubtaskOrchestrator,
+    Subtask,
+    SubtaskGroup,
+    SubtaskStatus
+)
+from octopai.core.persistent_memory import (
+    PersistentMemory,
+    UserProfile,
+    MemoryFact,
+    UserPreference,
+    ConversationSummary
+)
+from octopai.core.sandbox_executor import (
+    SandboxExecutor,
+    SandboxSession,
+    SandboxConfig,
+    ExecutionResult,
+    SandboxMode,
+    ExecutionStatus
+)
 from octopai.api import (
     Octopai,
     create_from_url,
@@ -260,6 +287,25 @@ __all__ = [
     "SkillStar",
     "SkillRedirect",
     "SkillInstallRecord",
+    "WorkflowEngine",
+    "WorkflowDefinition",
+    "WorkflowStep",
+    "WorkflowStepStatus",
+    "SubtaskOrchestrator",
+    "Subtask",
+    "SubtaskGroup",
+    "SubtaskStatus",
+    "PersistentMemory",
+    "UserProfile",
+    "MemoryFact",
+    "UserPreference",
+    "ConversationSummary",
+    "SandboxExecutor",
+    "SandboxSession",
+    "SandboxConfig",
+    "ExecutionResult",
+    "SandboxMode",
+    "ExecutionStatus",
     "__version__",
     "__author__",
 ]
