@@ -395,6 +395,40 @@ class EvolutionEngine:
         self.self_verification_results: List[SelfVerificationResult] = []
         self.performance_trajectory: List[Dict[str, float]] = []
         self.strategy_adaptation_count: int = 0
+
+    def _call_api(self, data: Dict[str, Any], default_response: str = "") -> Optional[str]:
+        """Make API call with proper error handling and response parsing"""
+        headers = {
+            'Authorization': f'Bearer {self.api_config.OPENROUTER_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        try:
+            response = requests.post(
+                self.api_config.OPENROUTER_API_URL,
+                headers=headers,
+                json=data,
+                timeout=90
+            )
+            response.raise_for_status()
+            result = response.json()
+            choices = result.get('choices', [])
+            if not choices:
+                return default_response
+            message = choices[0].get('message', {})
+            content = message.get('content', '')
+            return content if content else default_response
+        except requests.exceptions.Timeout:
+            print(f"API request timed out")
+            return default_response
+        except requests.exceptions.RequestException as e:
+            print(f"API request failed: {str(e)}")
+            return default_response
+        except (ValueError, KeyError) as e:
+            print(f"API response parsing failed: {str(e)}")
+            return default_response
+        except Exception as e:
+            print(f"Unexpected API error: {str(e)}")
+            return default_response
     
     def _initialize_curriculum(self) -> List[CurriculumLevel]:
         """Initialize a progressive learning curriculum"""
@@ -624,39 +658,26 @@ Please create an exploratory, innovative version (v{candidate.version + 1}) that
         }
         
         try:
-            response = requests.post(
-                self.api_config.OPENROUTER_API_URL,
-                headers=headers,
-                json=data,
-                timeout=90
-            )
-            response.raise_for_status()
-            result = response.json()
-            improved_content = result.get('choices', [{}])[0].get('message', {}).get('content', candidate.content)
-            
+            improved_content = self._call_api(data, candidate.content)
+
             new_knowledge = candidate.knowledge_base.copy()
             new_knowledge[f'v{candidate.version}_exploratory'] = {'strategy': 'exploratory', 'timestamp': datetime.now().isoformat()}
-            
+
             return EvolutionCandidate(
                 content=improved_content,
                 version=candidate.version + 1,
                 ancestors=candidate.ancestors + [f"v{candidate.version}_exploratory"],
                 knowledge_base=new_knowledge
             )
-            
+
         except Exception as e:
             print(f"Exploratory mutation failed: {e}")
             return candidate
-    
+
     def _refinement_mutation(self, candidate: EvolutionCandidate, diagnosis: str) -> EvolutionCandidate:
         """Refinement mutation for polishing high-quality candidates"""
         lessons_text = "\n".join([f"- {lesson}" for lesson in self.lessons_learned[-20:]])
-        
-        headers = {
-            'Authorization': f'Bearer {self.api_config.OPENROUTER_API_KEY}',
-            'Content-Type': 'application/json'
-        }
-        
+
         data = {
             "model": self.config.model,
             "messages": [
@@ -689,30 +710,22 @@ Please create a refined, polished version (v{candidate.version + 1}) that perfec
         }
         
         try:
-            response = requests.post(
-                self.api_config.OPENROUTER_API_URL,
-                headers=headers,
-                json=data,
-                timeout=90
-            )
-            response.raise_for_status()
-            result = response.json()
-            improved_content = result.get('choices', [{}])[0].get('message', {}).get('content', candidate.content)
-            
+            improved_content = self._call_api(data, candidate.content)
+
             new_knowledge = candidate.knowledge_base.copy()
             new_knowledge[f'v{candidate.version}_refinement'] = {'strategy': 'refinement', 'timestamp': datetime.now().isoformat()}
-            
+
             return EvolutionCandidate(
                 content=improved_content,
                 version=candidate.version + 1,
                 ancestors=candidate.ancestors + [f"v{candidate.version}_refinement"],
                 knowledge_base=new_knowledge
             )
-            
+
         except Exception as e:
             print(f"Refinement mutation failed: {e}")
             return candidate
-    
+
     def _add_knowledge_chunk(self, content: str, source: str, category: str, relevance_score: float = 0.5) -> str:
         """Add a chunk of knowledge to the knowledge base"""
         import uuid
@@ -1038,33 +1051,25 @@ Please create an improved version (v{candidate.version + 1})."""
         }
         
         try:
-            response = requests.post(
-                self.api_config.OPENROUTER_API_URL,
-                headers=headers,
-                json=data,
-                timeout=90
-            )
-            response.raise_for_status()
-            result = response.json()
-            improved_content = result.get('choices', [{}])[0].get('message', {}).get('content', candidate.content)
-            
+            improved_content = self._call_api(data, candidate.content)
+
             new_knowledge = candidate.knowledge_base.copy()
             new_knowledge[f'v{candidate.version}_improvements'] = {
                 'applied_lessons': self.lessons_learned[-5:],
                 'timestamp': datetime.now().isoformat()
             }
-            
+
             return EvolutionCandidate(
                 content=improved_content,
                 version=candidate.version + 1,
                 ancestors=candidate.ancestors + [f"v{candidate.version}"],
                 knowledge_base=new_knowledge
             )
-            
+
         except Exception as e:
             print(f"Reflective mutation failed: {e}")
             return candidate
-    
+
     def _system_aware_merge(self, candidates: List[EvolutionCandidate]) -> List[EvolutionCandidate]:
         """System-aware merge of complementary candidates"""
         merged_candidates = []
@@ -1124,33 +1129,25 @@ Please merge these two skills, combining their unique strengths through system-a
         }
         
         try:
-            response = requests.post(
-                self.api_config.OPENROUTER_API_URL,
-                headers=headers,
-                json=data,
-                timeout=90
-            )
-            response.raise_for_status()
-            result = response.json()
-            merged_content = result.get('choices', [{}])[0].get('message', {}).get('content', candidate_a.content)
-            
+            merged_content = self._call_api(data, candidate_a.content)
+
             combined_knowledge = {}
             combined_knowledge.update(candidate_a.knowledge_base)
             combined_knowledge.update(candidate_b.knowledge_base)
             combined_knowledge['merge_source'] = f"v{candidate_a.version}+v{candidate_b.version}"
             combined_knowledge['merge_type'] = "system_aware"
-            
+
             return EvolutionCandidate(
                 content=merged_content,
                 version=max(candidate_a.version, candidate_b.version) + 1,
                 ancestors=[f"system_aware_merge(v{candidate_a.version}+v{candidate_b.version})"],
                 knowledge_base=combined_knowledge
             )
-            
+
         except Exception as e:
             print(f"System-aware merge failed: {e}")
             return None
-    
+
     def _update_pareto_frontier(self, new_candidates: List[EvolutionCandidate]):
         """Update the Pareto frontier with new candidates"""
         for candidate in new_candidates:
@@ -1316,15 +1313,7 @@ Please provide comprehensive diagnosis and prioritized recommendations."""
         }
         
         try:
-            response = requests.post(
-                self.api_config.OPENROUTER_API_URL,
-                headers=headers,
-                json=data,
-                timeout=90
-            )
-            response.raise_for_status()
-            result = response.json()
-            return result.get('choices', [{}])[0].get('message', {}).get('content', "No diagnosis available")
+            return self._call_api(data, "No diagnosis available")
         except Exception as e:
             return f"Analysis synthesis: {str(e)}"
     
