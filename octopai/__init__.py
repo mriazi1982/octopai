@@ -150,6 +150,39 @@ from octopai.core.sandbox_executor import (
     SandboxMode,
     ExecutionStatus
 )
+from octopai.core.skill_spec import (
+    SkillTriggerType,
+    SkillCategory,
+    SkillDependency,
+    SkillResource,
+    SkillScript,
+    SkillExample,
+    SkillGuideline,
+    SkillTrigger,
+    OctopaiSkillSpec,
+    SkillFolder,
+    create_skill_folder
+)
+from octopai.core.skill_hub import (
+    PluginMarketplace
+)
+from octopai.core.document_skills import (
+    DocumentFormat,
+    DocumentMetadata,
+    ExtractedText,
+    FormField,
+    TableData,
+    PDFSkill,
+    DOCXSkill,
+    XLSXSkill,
+    PPTXSkill,
+    DocumentSkillFactory
+)
+from octopai.core.skill_templates import (
+    TemplateCategory,
+    SkillTemplate,
+    SkillTemplateLibrary
+)
 from octopai.api import (
     Octopai,
     create_from_url,
@@ -306,6 +339,30 @@ __all__ = [
     "ExecutionResult",
     "SandboxMode",
     "ExecutionStatus",
+    "SkillTriggerType",
+    "SkillCategory",
+    "SkillResource",
+    "SkillScript",
+    "SkillExample",
+    "SkillGuideline",
+    "SkillTrigger",
+    "OctopaiSkillSpec",
+    "SkillFolder",
+    "create_skill_folder",
+    "PluginMarketplace",
+    "DocumentFormat",
+    "DocumentMetadata",
+    "ExtractedText",
+    "FormField",
+    "TableData",
+    "PDFSkill",
+    "DOCXSkill",
+    "XLSXSkill",
+    "PPTXSkill",
+    "DocumentSkillFactory",
+    "TemplateCategory",
+    "SkillTemplate",
+    "SkillTemplateLibrary",
     "__version__",
     "__author__",
 ]
